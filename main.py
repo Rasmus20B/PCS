@@ -3,23 +3,23 @@
 import argparse
 
 import scanner
+import parser
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("inputFile", type=str)
-    parser.add_argument('-o', '--output')
-    args = parser.parse_args()
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument("inputFile", type=str)
+    argparser.add_argument('-o', '--output')
+    args = argparser.parse_args()
 
     with open(args.inputFile, "r") as f:
         content = scanner.progText(f.read())
 
-    print(content.text)
     tokens = scanner.scan(content)
-    for t in tokens:
-        val = t.val
-        ty = t.valType
-        print(f"{ty} : {val} \n")
+    tree = parser.parse(tokens)
 
-
+    if args.output:
+        with open(args.output, "w") as f:
+            for i in tokens:
+                f.write(str(i.valType.value))
 if __name__ == "__main__":
     main()

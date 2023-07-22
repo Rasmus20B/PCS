@@ -29,6 +29,7 @@ class TokenType(Enum):
     STR_LIT = 9
     INT_LIT = 10
     FLOAT_LIT = 11
+    EOF = 12
 
 class Token:
     def __init__(self, valType, val):
@@ -62,6 +63,10 @@ def scan(prog : progText):
                 tokens.append(t)
             case ";":
                 t = Token(valType=TokenType.SEMICOL, val="")
+                tokens.append(t)
+            case "EOF":
+                t = Token(valType=TokenType.EOF, val="")
+                tokens.append(t)
             case _:
                 if prog.curTok().isnumeric():
                     while prog.curTok().isnumeric():

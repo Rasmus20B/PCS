@@ -15,7 +15,12 @@ def main():
         content = scanner.progText(f.read())
 
     tokens = scanner.scan(content)
-    tree = parser.parse(tokens)
+    parse = parser.parser()
+
+    parse.parse()
+
+    for t in tokens:
+        print(f"{t.valType} : {t.val}\n ")
 
     if args.output:
         with open(args.output, "w") as f:

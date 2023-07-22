@@ -30,6 +30,7 @@ class TokenType(Enum):
     INT_LIT = 10
     FLOAT_LIT = 11
     EOF = 12
+    FLOAT = 13
 
 class Token:
     def __init__(self, valType, val):
@@ -53,7 +54,7 @@ def scan(prog : progText):
                 t = Token(valType=TokenType.OPEN_PAREN, val="")
                 tokens.append(t)
             case ")":
-                t = Token(valType=TokenType.CLOSE_BRACK, val="")
+                t = Token(valType=TokenType.CLOSE_PAREN, val="")
                 tokens.append(t)
             case "{":
                 t = Token(valType=TokenType.OPEN_BRACK, val="")
@@ -83,9 +84,20 @@ def scan(prog : progText):
                     while(prog.curTok().isalnum()):
                         cur += prog.curTok()
                         if prog.nextTok() in [" ", "\t", "\n", "(", ")", "{", "}", "EOF"]:
-                            t = Token(valType=TokenType.IDENT, val=cur)
-                            tokens.append(t)
-                            prog.index -= 1
+                            match cur:
+                                case "int":
+                                    t = Token(valType=TokenType.INT, val="")
+                                    tokens.append(t)
+                                case "void":
+                                    t = Token(valType=TokenType.VOID, val="")
+                                    tokens.append(t)
+                                case "float":
+                                    t = Token(valType=TokenType.FLOAT, val="")
+                                    tokens.append(t)
+                                case _:
+                                    t = Token(valType=TokenType.IDENT, val=cur)
+                                    tokens.append(t)
+                                    prog.index -= 1
                             break
                 elif(prog.curTok() == "\""):
                     prog.nextTok()

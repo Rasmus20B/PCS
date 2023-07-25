@@ -1,9 +1,10 @@
 from enum import Enum
+from re import S
 
+from attrs import define, field
+
+@define
 class progText():
-    def __init__(self, text):
-        self.text = text
-        self.index = 0
     def nextTok(self):
         if self.index == len(self.text) - 1:
             return "EOF"
@@ -15,7 +16,7 @@ class progText():
         return self.text[self.index]
 
     text : str
-    index : int
+    index : int = field(default=0)
 
 class TokenType(Enum):
     VOID = 1
@@ -31,6 +32,16 @@ class TokenType(Enum):
     FLOAT_LIT = 11
     EOF = 12
     FLOAT = 13
+    ADD = 14
+    SUB = 15
+    DIV = 16
+    MUL = 17
+    MOD = 18
+    COMMA = 19
+    LOG_AND = 20
+    LOG_OR = 21
+    BIT_AND = 22
+    BIT_OR = 23
 
 class Token:
     def __init__(self, valType, val):
@@ -62,8 +73,35 @@ def scan(prog : progText):
             case "}":
                 t = Token(valType=TokenType.CLOSE_BRACK, val="")
                 tokens.append(t)
+            case ",":
+                t = Token(valType=TokenType.COMMA, val="")
+                tokens.append(t)
             case ";":
                 t = Token(valType=TokenType.SEMICOL, val="")
+                tokens.append(t)
+            case "+":
+                t = Token(valType=TokenType.ADD, val="")
+                tokens.append(t)
+            case "-":
+                t = Token(valType=TokenType.SUB, val="")
+                tokens.append(t)
+            case "/":
+                t = Token(valType=TokenType.DIV, val="")
+                tokens.append(t)
+            case "*":
+                t = Token(valType=TokenType.MUL, val="")
+                tokens.append(t)
+            case "&":
+                if prog.nextTok() == "&":
+                    t = Token(valType=TokenType.LOG_AND, val="")
+                    tokens.append(t)
+                    continue
+                else:
+                    t = Token(valType=TokenType.BIT_AND, val="")
+                    tokens.append(t)
+                    continue
+            case "%":
+                t = Token(valType=TokenType.MOD, val="")
                 tokens.append(t)
             case "EOF":
                 t = Token(valType=TokenType.EOF, val="")
@@ -106,6 +144,10 @@ def scan(prog : progText):
                         prog.nextTok()
                     t = Token(valType=TokenType.STR_LIT, val=cur)
                     tokens.append(t)
+                else:
+                    c = prog.curTok()
+                    print(f"Unrecognised token brah: {c}")
+
         prog.nextTok()
         if(prog.curTok() == "EOF"):
             break

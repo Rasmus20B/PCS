@@ -18,15 +18,24 @@ class Root(Node):
 
 class Compound(Node):
     def __init__(self):
-        pass
+        self.children = []
     children: []
 
 
-class Func_decl(Node):
+class Decl_Statement(Node):
+    def __init__(self, expr):
+        self.child = expr
+        pass
+
+    child: Node
+
+
+class Func_Decl(Node):
     def __init__(self, t, n, a):
         self.ftype = t
         self.name = n
         self.args = a
+        self.child = ""
 
     ftype: str
     name: str
@@ -34,15 +43,23 @@ class Func_decl(Node):
     child: Compound
 
 
+class lit_int(Node):
+    def __init__(self, val):
+        self.val = val
+    val: int
+
+
 class Unary(Node):
     child: Node
 
 
 class Binary(Node):
-    def __init__(self, c1, c2):
+    def __init__(self, op, c1, c2):
+        self.operand = op
         self.child1 = c1
         self.child2 = c2
 
+    operand: str
     child1: Node
     child2: Node
 
@@ -71,34 +88,84 @@ class parser():
     def __init__(self, tokens: List[sc.Token]):
         self.tokens = tokens
 
-    def parse_compound_statement(self, index):
-        print("FOUND A COMPOUND STATEMENT")
-        while self.tokens[index].valType is not sc.TokenType.CLOSE_BRACK:
-            index += 1
+    def parse_expr(self, index):
+        print(f"{self.tokens[index].valType}, {self.tokens[index].val}")
         index += 1
-        return index, Compound()
+        match self.tokens[index].valType:
+            case sc.TokenType.SEMICOL:
+                return index, lit_int(self.tokens[index].val)
+            case sc.TokenType.ADD:
+                self.nextToken()
+                o2 = self.peek()
+                index += 3
+                return index, Binary("Add", self.tokens[index], o2)
+            case sc.TokenType.EOF:
+                return index, None
+            case _:
+                print("Unrecognized expression")
 
-    def parse_func_decl(self, index):
-        # TODO: Implement specifiers
-        spec = ""
-        name = ""
+    def parse_statement(self, index):
+        if self.tokens[index].valType == sc.TokenType.EOF:
+            return index, None
+        match self.tokens[index].valType:
+            case sc.TokenType.SEMICOL:
+                return index, None
+            case sc.TokenType.EOF:
+                return index, None
+            case sc.TokenType.INT_LIT:
+                index, expr = self.parse_expr(index)
+                if expr is None:
+                    return index, None
+                return index, Decl_Statement(expr)
+            case sc.TokenType.IDENT:
+                index, expr = self.parse_expr(index)
+                if expr is None:
+                    return index, None
+                return index, Decl_Statement(expr)
+            case sc.TokenType.CLOSE_BRACK:
+                return index, None
+            case _:
+                print("Unrecognized statement")
+                return index, None
+        return index, Decl_Statement()
+
+    def parse_compound_statement(self, index):
+        comp = Compound()
+        while True:
+            index, stat = self.parse_statement(index)
+            if stat:
+                comp.children.append(stat)
+            else:
+                break
+
+        print(f"Statements in compound : {len(comp.children)}")
+        # while self.tokens[index].valType is not sc.TokenType.CLOSE_BRACK:
+        #     index += 1
+        index += 1
+        return index, comp
+
+    def parse_func_Decl(self, index):
+        # TODO: Implement specifiers and more types
+        fun = Func_Decl("", "", "")
         match self.tokens[index].valType:
             case sc.TokenType.EOF:
-                return index, Func_decl(0, 0, 0)
+                return index, fun
             case sc.TokenType.INT:
-                spec = "int"
+                fun.ftype = "int"
             case sc.TokenType.VOID:
-                spec = "void"
+                fun.ftype = "void"
+            case sc.TokenType.FLOAT:
+                fun.ftype = "int"
             case _:
                 print(f"Unrecognized type specifier: \
                         {self.tokens[index].valType}")
-                return index, Func_decl(0, 0, 0)
-
+                index += 1
+                return index, fun
         index += 1
 
         match self.tokens[index].valType:
             case sc.TokenType.IDENT:
-                name = self.tokens[index].val
+                fun.name = self.tokens[index].val
             case _:
                 print("Expected Identifier for function")
 
@@ -106,13 +173,21 @@ class parser():
                 not in [sc.TokenType.SEMICOL,
                         sc.TokenType.OPEN_BRACK, sc.TokenType.EOF]:
             index += 1
+        match self.tokens[index].valType:
+            case sc.TokenType.SEMICOL:
+                index += 1
+                return index, fun
+            case sc.TokenType.OPEN_BRACK:
+                index += 1
+                index, fun.child = self.parse_compound_statement(index)
+                pass
 
-        return index, Func_decl(spec, name, "")
+        return index, fun
 
     def parse_root(self):
         while True:
-            self.idx, func = self.parse_func_decl(self.idx)
-            if func.name != 0:
+            self.idx, func = self.parse_func_Decl(self.idx)
+            if func.name != "":
                 self.ast.append(func)
             match self.tokens[self.idx].valType:
                 case sc.TokenType.SEMICOL:
@@ -128,6 +203,11 @@ class parser():
 
         for decl in self.ast:
             print(f"Found func decl for: {decl.name} := {decl.ftype} ")
+            c: Compound = decl.child
+            if (c):
+                print("compound statement:")
+                for com in c.children:
+                    print(f"statement: {com.child}")
 
     def parse(self):
         a: sc.Token = self.peek()

@@ -121,14 +121,14 @@ def scan(prog: progText):
                     while prog.curTok().isnumeric():
                         cur += prog.curTok()
                         if prog.nextTok() in [" ", "\t", "\n", "(", ")", "{",
-                                              "}", "EOF", "f"]:
+                                              "}", "EOF", "f", ";"]:
                             if prog.curTok() == "f":
                                 t = Token(valType=TokenType.FLOAT_LIT, val=cur)
                             else:
                                 t = Token(valType=TokenType.INT_LIT, val=cur)
-                            tokens.append(t)
-                            prog.index -= 1
-                            break
+                                tokens.append(t)
+                                prog.index -= 1
+                        break
                 elif (prog.curTok().isalpha()):
                     while (prog.curTok().isalnum()):
                         cur += prog.curTok()

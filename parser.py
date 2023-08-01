@@ -16,6 +16,12 @@ class Root(Node):
     children: []
 
 
+class Compound(Node):
+    def __init__(self):
+        pass
+    children: []
+
+
 class Func_decl(Node):
     def __init__(self, t, n, a):
         self.ftype = t
@@ -25,6 +31,7 @@ class Func_decl(Node):
     ftype: str
     name: str
     args: []
+    child: Compound
 
 
 class Unary(Node):
@@ -51,10 +58,6 @@ class Ternary(Node):
     child3: Node
 
 
-class Compound(Node):
-    children: []
-
-
 class parser():
     symbols = []
     labels = []
@@ -73,7 +76,7 @@ class parser():
         while self.tokens[index].valType is not sc.TokenType.CLOSE_BRACK:
             index += 1
         index += 1
-        return index
+        return index, Compound()
 
     def parse_func_decl(self, index):
         # TODO: Implement specifiers
@@ -87,7 +90,8 @@ class parser():
             case sc.TokenType.VOID:
                 spec = "void"
             case _:
-                print(f"Unrecognized type specifier: {self.tokens[index].valType}")
+                print(f"Unrecognized type specifier: \
+                        {self.tokens[index].valType}")
                 return index, Func_decl(0, 0, 0)
 
         index += 1
@@ -98,7 +102,9 @@ class parser():
             case _:
                 print("Expected Identifier for function")
 
-        while self.tokens[index].valType not in [sc.TokenType.SEMICOL, sc.TokenType.OPEN_BRACK, sc.TokenType.EOF]:
+        while self.tokens[index].valType \
+                not in [sc.TokenType.SEMICOL,
+                        sc.TokenType.OPEN_BRACK, sc.TokenType.EOF]:
             index += 1
 
         return index, Func_decl(spec, name, "")
@@ -108,18 +114,20 @@ class parser():
             self.idx, func = self.parse_func_decl(self.idx)
             if func.name != 0:
                 self.ast.append(func)
-                print(f"Found func decl for: {func.name} := {func.ftype} ")
             match self.tokens[self.idx].valType:
                 case sc.TokenType.SEMICOL:
                     self.idx += 1
                     continue
                 case sc.TokenType.OPEN_BRACK:
                     self.idx += 1
-                    self.idx = self.parse_compound_statement(self.idx)
+                    self.idx, s = self.parse_compound_statement(self.idx)
+                    func.child = s
                     continue
                 case sc.TokenType.EOF:
                     break
-        pass
+
+        for decl in self.ast:
+            print(f"Found func decl for: {decl.name} := {decl.ftype} ")
 
     def parse(self):
         a: sc.Token = self.peek()

@@ -16,8 +16,6 @@ def main():
         content = scanner.progText(f.read())
 
     tokens = scanner.scan(content)
-    for t in tokens:
-        print(f"{t.valType} : {t.val}\n ")
     parse = parser.parser(tokens)
 
     parse.parse_root()

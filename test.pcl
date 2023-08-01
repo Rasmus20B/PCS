@@ -1,3 +1,4 @@
+void main();
 void main() {
   flagSet(32);
   wait(60);

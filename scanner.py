@@ -1,7 +1,7 @@
 from enum import Enum
-from re import S
 
 from attrs import define, field
+
 
 @define
 class progText():
@@ -10,18 +10,20 @@ class progText():
             return "EOF"
         self.index += 1
         return self.text[self.index]
+
     def curTok(self):
         if self.index == len(self.text) - 1:
             return "EOF"
         return self.text[self.index]
 
-    text : str
-    index : int = field(default=0)
+    text: str
+    index: int = field(default=0)
+
 
 class TokenType(Enum):
     VOID = 1
-    INT  = 2
-    IDENT = 3 
+    INT = 2
+    IDENT = 3
     OPEN_PAREN = 4
     CLOSE_PAREN = 5
     OPEN_BRACK = 6
@@ -42,23 +44,30 @@ class TokenType(Enum):
     LOG_OR = 21
     BIT_AND = 22
     BIT_OR = 23
+    EQ = 24
+    NEQ = 25
+    LE = 26
+    GR = 27
+    LEQ = 28
+    GEQ = 29
+
 
 class Token:
     def __init__(self, valType, val):
         self.valType = valType
         self.val = val
 
-    valType : TokenType
-    val : str
+    valType: TokenType
+    val: str
 
 
-def scan(prog : progText):
+def scan(prog: progText):
     tokens = []
     cur = ""
     while True:
         cur = ""
         match prog.curTok():
-            # Skipping whitespace 
+            # Skipping whitespace
             case " " | "\n" | "\t":
                 pass
             case "(":
@@ -106,11 +115,13 @@ def scan(prog : progText):
             case "EOF":
                 t = Token(valType=TokenType.EOF, val="")
                 tokens.append(t)
+                break
             case _:
                 if prog.curTok().isnumeric():
                     while prog.curTok().isnumeric():
                         cur += prog.curTok()
-                        if prog.nextTok() in [" ", "\t", "\n", "(", ")", "{", "}", "EOF", "f"]:
+                        if prog.nextTok() in [" ", "\t", "\n", "(", ")", "{",
+                                              "}", "EOF", "f"]:
                             if prog.curTok() == "f":
                                 t = Token(valType=TokenType.FLOAT_LIT, val=cur)
                             else:
@@ -118,10 +129,11 @@ def scan(prog : progText):
                             tokens.append(t)
                             prog.index -= 1
                             break
-                elif(prog.curTok().isalpha()):
-                    while(prog.curTok().isalnum()):
+                elif (prog.curTok().isalpha()):
+                    while (prog.curTok().isalnum()):
                         cur += prog.curTok()
-                        if prog.nextTok() in [" ", "\t", "\n", "(", ")", "{", "}", "EOF"]:
+                        if prog.nextTok() in [" ", "\t", "\n", "(", ")",
+                                              "{", "}", "EOF"]:
                             match cur:
                                 case "int":
                                     t = Token(valType=TokenType.INT, val="")
@@ -137,19 +149,19 @@ def scan(prog : progText):
                                     tokens.append(t)
                                     prog.index -= 1
                             break
-                elif(prog.curTok() == "\""):
+                elif (prog.curTok() == "\""):
                     prog.nextTok()
-                    while(prog.curTok() not in ["\"", "EOF"]):
+                    while (prog.curTok() not in ["\"", "EOF"]):
                         cur += prog.curTok()
                         prog.nextTok()
                     t = Token(valType=TokenType.STR_LIT, val=cur)
                     tokens.append(t)
-                else:
-                    c = prog.curTok()
-                    print(f"Unrecognised token brah: {c}")
-
+                    prog.nextTok()
+                    continue
         prog.nextTok()
-        if(prog.curTok() == "EOF"):
+        if (prog.curTok() == "EOF"):
+            t = Token(valType=TokenType.EOF, val="")
+            tokens.append(t)
             break
         else:
             continue

@@ -1,4 +1,4 @@
-pushi 3
-pushi 4
-addi
-seti $2
+etNew 0
+etOn 0
+wait 2000
+jmp 0

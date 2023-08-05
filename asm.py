@@ -18,6 +18,46 @@ class DWORD:
 def assemble(opcode, operands) -> []:
     code = []
     match opcode:
+        case "nop":
+            code.append(0x00)
+            code.append(0x00)
+        case "delete":
+            code.append(0x00)
+            code.append(0x01)
+        case "ret":
+            code.append(0x00)
+            code.append(0x0A)
+        case "call":
+            code.append(0x00)
+            code.append(0x0B)
+        case "jmp":
+            code.append(0x00)
+            code.append(0x0C)
+            par = DWORD(operands[0])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+        case "jmpeq":
+            code.append(0x00)
+            code.append(0x0D)
+            par = DWORD(operands[0])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+        case "jmpneq":
+            code.append(0x00)
+            code.append(0x0E)
+            par = DWORD(operands[0])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+        case "wait":
+            code.append(0x00)
+            code.append(0x17)
+            par = DWORD(operands[0])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
         case "pushi":
             code.append(0x00)
             code.append(0x2A)
@@ -28,6 +68,31 @@ def assemble(opcode, operands) -> []:
         case "addi":
             code.append(0x00)
             code.append(0x32)
+
+        case "enmCreate":
+            code.append(0x01)
+            code.append(0x2C)
+            par = DWORD(operands[0])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+
+        case "etNew":
+            code.append(0x02)
+            code.append(0x58)
+            par = DWORD(operands[0])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+
+        case "etOn":
+            code.append(0x02)
+            code.append(0x59)
+            par = DWORD(operands[0])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+
     return code
 
 

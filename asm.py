@@ -95,7 +95,92 @@ def assemble(opcode, operands) -> []:
             for s in par.segments:
                 code.append(s)
             par.clear()
-
+        case "etSprite":
+            code.append(0x02)
+            code.append(0x5A)
+            par = DWORD(operands[0])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+            par = DWORD(operands[1])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+            par = DWORD(operands[2])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+        case "etOffset":
+            code.append(0x02)
+            code.append(0x5B)
+            par = DWORD(operands[0])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+            par = DWORD(operands[1])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+            par = DWORD(operands[2])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+        case "etAngle":
+            code.append(0x02)
+            code.append(0x5C)
+            par = DWORD(operands[0])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+            par = DWORD(operands[1])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+            par = DWORD(operands[2])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+        case "etSpeed":
+            code.append(0x02)
+            code.append(0x5D)
+            par = DWORD(operands[0])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+            par = DWORD(operands[1])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+            par = DWORD(operands[2])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+        case "etCount":
+            code.append(0x02)
+            code.append(0x5E)
+            par = DWORD(operands[0])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+            par = DWORD(operands[1])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+            par = DWORD(operands[2])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+        case "etAim":
+            code.append(0x02)
+            code.append(0x5F)
+            par = DWORD(operands[0])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+            par = DWORD(operands[1])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
     return code
 
 

@@ -4,19 +4,11 @@ import argparse
 
 
 class DWORD:
-    def __init__(self, num):
-        self.segments.append(int(num) & 0x000000FF)
-        self.segments.append((int(num) & 0x0000FF00) >> 8)
-        self.segments.append((int(num) & 0x00FF0000) >> 16)
-        self.segments.append((int(num) & 0xFF000000) >> 24)
-
-    def __str__(self):
-        i = 0
-        i += (self.segments[0] & 0x000000FF)
-        i += (self.segments[1] << 8) & 0x0000FF00
-        i += (self.segments[2] << 16) & 0x00FF0000
-        i += (self.segments[3] << 24) & 0xFF000000
-        return str(i)
+    def __init__(self, num: int):
+        self.segments.append((int(num) >> 24) & 0xFF)
+        self.segments.append((int(num) >> 16) & 0xFF)
+        self.segments.append((int(num) >> 8) & 0xFF)
+        self.segments.append((int(num)) & 0xFF)
 
     def clear(self):
         self.segments.clear()
@@ -85,6 +77,8 @@ def assemble(opcode, operands) -> []:
             code.append(0x01)
             code.append(0x90)
             par = DWORD(operands[0])
+            for i in operands:
+                print(i)
             for s in par.segments:
                 code.append(s)
             par.clear()

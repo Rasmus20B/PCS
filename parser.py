@@ -49,6 +49,12 @@ class lit_int(Node):
     val: int
 
 
+class expr_statement(Node):
+    def __init__(self, series):
+        self.expr = []
+    expr: []
+
+
 class Unary(Node):
     child: Node
 
@@ -98,11 +104,15 @@ class parser():
                 self.nextToken()
                 o2 = self.peek()
                 index += 3
-                return index, Binary("Add", self.tokens[index], o2)
+                return index, Binary("Add", lit_int(self.tokens[index].val), lit_int(o2.val))
             case sc.TokenType.EOF:
                 return index, None
             case _:
                 print("Unrecognized expression")
+
+    def parse_expr_statement(self, index):
+        while self.tokens[index].valType is not sc.TokenType.SEMICOL:
+            index, expr = self.parse_expr(index)
 
     def parse_statement(self, index):
         if self.tokens[index].valType == sc.TokenType.EOF:
@@ -208,6 +218,10 @@ class parser():
                 print("compound statement:")
                 for com in c.children:
                     print(f"statement: {com.child}")
+                    if type(com.child) == Binary:
+                        print(f"{com.child.child1} \
+                                {com.child.operand} \
+                                {com.child.child2}")
 
     def parse(self):
         a: sc.Token = self.peek()

@@ -102,20 +102,19 @@ def assemble(opcode, operands) -> []:
 def tokenize(progtext):
     code = []
     i = 0
+    addr = 0
     operands = []
     while i < len(progtext):
         opcode = ""
+        print("before ", addr, "@", progtext[i])
         while i < len(progtext) and not progtext[i].isspace():
             if progtext[i] == ":":
-                print(opcode)
-                if (i == len(opcode)):
-                    labels[str(opcode)] = i - len(opcode)
-                else:
-                    labels[str(opcode)] = i - (len(opcode) * 2) - 1
+                labels[str(opcode)] = addr
                 i += 1
                 continue
             opcode += progtext[i]
             i += 1
+        lo = 0
         while i < len(progtext) and progtext[i] != '\n':
             i += 1
             curop = ""
@@ -123,9 +122,11 @@ def tokenize(progtext):
                 curop += progtext[i]
                 i += 1
             operands.append(curop)
+            lo += len(curop)
         code += assemble(opcode, operands)
         operands.clear()
         i += 1
+        addr += len(opcode) + lo
     return code
 
 

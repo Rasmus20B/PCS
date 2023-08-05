@@ -15,6 +15,9 @@ class DWORD:
     segments = []
 
 
+labels = {}
+
+
 def assemble(opcode, operands) -> []:
     code = []
     match opcode:
@@ -33,7 +36,8 @@ def assemble(opcode, operands) -> []:
         case "jmp":
             code.append(0x00)
             code.append(0x0C)
-            par = DWORD(operands[0])
+            addr = labels[operands[0]]
+            par = DWORD(addr)
             for s in par.segments:
                 code.append(s)
             par.clear()
@@ -84,7 +88,6 @@ def assemble(opcode, operands) -> []:
             for s in par.segments:
                 code.append(s)
             par.clear()
-
         case "etOn":
             code.append(0x02)
             code.append(0x59)
@@ -103,6 +106,14 @@ def tokenize(progtext):
     while i < len(progtext):
         opcode = ""
         while i < len(progtext) and not progtext[i].isspace():
+            if progtext[i] == ":":
+                print(opcode)
+                if (i == len(opcode)):
+                    labels[str(opcode)] = i - len(opcode)
+                else:
+                    labels[str(opcode)] = i - (len(opcode) * 2) - 1
+                i += 1
+                continue
             opcode += progtext[i]
             i += 1
         while i < len(progtext) and progtext[i] != '\n':
@@ -112,9 +123,6 @@ def tokenize(progtext):
                 curop += progtext[i]
                 i += 1
             operands.append(curop)
-        for o in operands:
-            print((o))
-        print("done")
         code += assemble(opcode, operands)
         operands.clear()
         i += 1

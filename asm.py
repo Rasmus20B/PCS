@@ -206,7 +206,6 @@ def assemble(opcode, operands) -> []:
         case _:
             print(f"Unknown Opcode: {opcode}")
 
-
     return code
 
 
@@ -219,7 +218,6 @@ def tokenize(progtext):
     lines = progtext.splitlines()
 
     for i, line in enumerate(lines):
-        print(f"Looking at line {i}: Addr = {addr}")
         words = line.split(sep=" ")
         opcode = words[0]
         operands = words[1:]

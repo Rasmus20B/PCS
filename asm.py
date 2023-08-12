@@ -52,7 +52,8 @@ def assemble(opcode, operands) -> []:
         case "jmpeq":
             code.append(0x00)
             code.append(0x0D)
-            par = DWORD(operands[0])
+            addr = labels[operands[0]]
+            par = DWORD(addr)
             for s in par.segments:
                 code.append(s)
             par.clear()
@@ -201,6 +202,11 @@ def assemble(opcode, operands) -> []:
             for s in par.segments:
                 code.append(s)
             par.clear()
+
+        case _:
+            print(f"Unknown Opcode: {opcode}")
+
+
     return code
 
 
@@ -208,29 +214,29 @@ def tokenize(progtext):
     code = []
     i = 0
     addr = 0
-    operands = []
-    while i < len(progtext):
-        opcode = ""
-        while i < len(progtext) and not progtext[i].isspace():
-            if progtext[i] == ":":
-                labels[str(opcode)] = addr
-                i += 1
-                continue
-            opcode += progtext[i]
-            i += 1
-        lo = 0
-        while i < len(progtext) and progtext[i] != '\n':
-            i += 1
-            curop = ""
-            while i < len(progtext) and not progtext[i].isspace():
-                curop += progtext[i]
-                i += 1
-            operands.append(curop)
-            lo += len(curop)
-        code += assemble(opcode, operands)
-        operands.clear()
-        i += 1
-        addr += len(opcode) + lo
+    code = []
+
+    lines = progtext.splitlines()
+
+    for i, line in enumerate(lines):
+        print(f"Looking at line {i}: Addr = {addr}")
+        words = line.split(sep=" ")
+        opcode = words[0]
+        operands = words[1:]
+        if opcode.endswith(":"):
+            # label case
+            if len(operands) > 0:
+                print("Warning @{i}: operands to line starting with label will be ignored")
+            label = opcode
+            if label in labels:
+                print("Error @{i}: Label already defined")
+                exit()
+            labels[label[:-1]] = addr
+        else:
+            # regaular case
+            code += assemble(opcode, operands)
+            addr += 4 * len(operands) + 2
+
     return code
 
 

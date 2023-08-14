@@ -60,7 +60,8 @@ def assemble(opcode, operands) -> []:
         case "jmpneq":
             code.append(0x00)
             code.append(0x0E)
-            par = DWORD(operands[0])
+            addr = labels[operands[0]]
+            par = DWORD(addr)
             for s in par.segments:
                 code.append(s)
             par.clear()
@@ -74,6 +75,13 @@ def assemble(opcode, operands) -> []:
         case "pushi":
             code.append(0x00)
             code.append(0x2A)
+            par = DWORD(operands[0])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+        case "seti":
+            code.append(0x00)
+            code.append(0x2B)
             par = DWORD(operands[0])
             for s in par.segments:
                 code.append(s)

@@ -65,6 +65,33 @@ def assemble(opcode, operands) -> []:
             for s in par.segments:
                 code.append(s)
             par.clear()
+        case "callasync":
+            code.append(0x00)
+            code.append(0x0F)
+            addr = labels[operands[0]]
+            par = DWORD(addr)
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+        case "callasyncid":
+            code.append(0x00)
+            code.append(0x10)
+            addr = labels[operands[0]]
+            par = DWORD(addr)
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+            par = DWORD(operands[1])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+        case "killasync":
+            code.append(0x00)
+            code.append(0x11)
+            par = DWORD(operands[0])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
         case "wait":
             code.append(0x00)
             code.append(0x17)
@@ -89,6 +116,27 @@ def assemble(opcode, operands) -> []:
         case "addi":
             code.append(0x00)
             code.append(0x32)
+        case "addf":
+            code.append(0x00)
+            code.append(0x33)
+        case "subi":
+            code.append(0x00)
+            code.append(0x34)
+        case "subf":
+            code.append(0x00)
+            code.append(0x35)
+        case "muli":
+            code.append(0x00)
+            code.append(0x36)
+        case "mulf":
+            code.append(0x00)
+            code.append(0x37)
+        case "divi":
+            code.append(0x00)
+            code.append(0x38)
+        case "divf":
+            code.append(0x00)
+            code.append(0x39)
 
         case "movePos":
             code.append(0x01)
@@ -110,6 +158,18 @@ def assemble(opcode, operands) -> []:
                 code.append(s)
             par.clear()
 
+        case "anmSetSprite":
+            code.append(0x01)
+            code.append(0x2f)
+
+            par = DWORD(operands[0])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+            par = DWORD(operands[1])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
         case "etNew":
             code.append(0x02)
             code.append(0x58)
@@ -232,7 +292,8 @@ def tokenize(progtext):
         if opcode.endswith(":"):
             # label case
             if len(operands) > 0:
-                print("Warning @{i}: operands to line starting with label will be ignored")
+                print("Warning @{i}: operands to line starting with label will\
+                      be ignored")
             label = opcode
             if label in labels:
                 print("Error @{i}: Label already defined")

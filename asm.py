@@ -41,6 +41,11 @@ def assemble(opcode, operands) -> []:
         case "call":
             code.append(0x00)
             code.append(0x0B)
+            addr = labels[operands[0]]
+            par = DWORD(addr)
+            for s in par.segments:
+                code.append(s)
+            par.clear()
         case "jmp":
             code.append(0x00)
             code.append(0x0C)
@@ -307,9 +312,29 @@ def tokenize(progtext):
     return code
 
 
+def genHeader():
+    header = []
+    header.append(0x7f)
+    header.append(0x44)
+    header.append(0x4d)
+    header.append(0x4c)
+
+    print(labels["start"])
+    print(labels["shoot"])
+    ep = labels["start"]
+
+    print(ep)
+    if ep:
+        header.append(ep)
+
+    return header
+
+
 def translate(progtext) -> []:
+    code = []
     code = tokenize(progtext)
-    return code
+    dml = genHeader() + code
+    return dml
 
 
 def main():

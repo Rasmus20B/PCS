@@ -41,48 +41,48 @@ def assemble(opcode, operands) -> []:
         case "call":
             code.append(0x00)
             code.append(0x0B)
-            addr = labels[operands[0]]
-            par = DWORD(addr)
+            a = labels[operands[0]]
+            par = DWORD(a)
             for s in par.segments:
                 code.append(s)
             par.clear()
         case "jmp":
             code.append(0x00)
             code.append(0x0C)
-            addr = labels[operands[0]]
-            par = DWORD(addr)
+            a = labels[operands[0]]
+            par = DWORD(a)
             for s in par.segments:
                 code.append(s)
             par.clear()
         case "jmpeq":
             code.append(0x00)
             code.append(0x0D)
-            addr = labels[operands[0]]
-            par = DWORD(addr)
+            a = labels[operands[0]]
+            par = DWORD(a)
             for s in par.segments:
                 code.append(s)
             par.clear()
         case "jmpneq":
             code.append(0x00)
             code.append(0x0E)
-            addr = labels[operands[0]]
-            par = DWORD(addr)
+            a = labels[operands[0]]
+            par = DWORD(a)
             for s in par.segments:
                 code.append(s)
             par.clear()
         case "callasync":
             code.append(0x00)
             code.append(0x0F)
-            addr = labels[operands[0]]
-            par = DWORD(addr)
+            a = labels[operands[0]]
+            par = DWORD(a)
             for s in par.segments:
                 code.append(s)
             par.clear()
         case "callasyncid":
             code.append(0x00)
             code.append(0x10)
-            addr = labels[operands[0]]
-            par = DWORD(addr)
+            a = labels[operands[0]]
+            par = DWORD(a)
             for s in par.segments:
                 code.append(s)
             par.clear()
@@ -154,19 +154,9 @@ def assemble(opcode, operands) -> []:
             for s in par.segments:
                 code.append(s)
             par.clear()
-
-        case "enmCreate":
+        case "movePosTime":
             code.append(0x01)
-            code.append(0x2C)
-            par = DWORD(operands[0])
-            for s in par.segments:
-                code.append(s)
-            par.clear()
-
-        case "anmSetSprite":
-            code.append(0x01)
-            code.append(0x2f)
-
+            code.append(0x91)
             par = DWORD(operands[0])
             for s in par.segments:
                 code.append(s)
@@ -175,6 +165,55 @@ def assemble(opcode, operands) -> []:
             for s in par.segments:
                 code.append(s)
             par.clear()
+            par = DWORD(operands[2])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+            par = DWORD(operands[3])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+
+        case "enmCreate":
+            code.append(0x01)
+            code.append(0x2C)
+            a = labels[operands[0]]
+            par = DWORD(a)
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+            par = DWORD(operands[1])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+            par = DWORD(operands[2])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+            par = DWORD(operands[3])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+            par = DWORD(operands[4])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+            par = DWORD(operands[5])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+        case "anmSetSprite":
+            code.append(0x01)
+            code.append(0x2f)
+            par = DWORD(operands[0])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+            par = DWORD(operands[1])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+
         case "etNew":
             code.append(0x02)
             code.append(0x58)
@@ -286,8 +325,6 @@ def tokenize(progtext):
     code = []
     i = 0
     addr = 0
-    code = []
-
     lines = progtext.splitlines()
 
     for i, line in enumerate(lines):
@@ -319,13 +356,13 @@ def genHeader():
     header.append(0x4d)
     header.append(0x4c)
 
-    print(labels["start"])
-    print(labels["shoot"])
     ep = labels["start"]
 
-    print(ep)
     if ep:
-        header.append(ep)
+        par = DWORD(ep)
+        for s in par.segments:
+            header.append(s)
+        par.clear()
 
     return header
 

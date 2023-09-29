@@ -5,6 +5,7 @@ precedence = {
         sc.TokenType.IDENT: -1,
         sc.TokenType.INT_LIT: -1,
         sc.TokenType.SEMICOL: -1,
+        sc.TokenType.EQ: -1,
         sc.TokenType.ADD: 1,
         }
 
@@ -77,7 +78,8 @@ class parser():
                 self.print_binary_expr(e.child)
 
     def print_binary_expr(self, e):
-        print(f"op: {e.val}")
+        if type(e) == Binary:
+            print(f"op: {e.val}")
         if type(e) == Binary and e.child1 is not None:
             print("going left")
             self.print_binary_expr(e.child1)
@@ -115,32 +117,49 @@ class parser():
                             self.print_compound(ci.child)
 
     def parse_var_assignment(self):
-        pass
+        self.nextToken()
+        print(f"variable name = {self.tokens[self.idx].val}")
+        lhs = self.parse_primary_expr()
+        self.nextToken()
+        return Binary(sc.TokenType.EQ,
+                      "=",
+                      lhs,
+                      self.parse_binop_expr(0, self.parse_primary_expr())
+                      )
 
     def parse_identifier_u(self):
-        num = Binary(sc.TokenType.IDENT, self.tokens[self.idx].val, None, None)
+        num = Binary(sc.TokenType.IDENT,
+                     self.tokens[self.idx].val,
+                     None,
+                     None)
+        num.val = self.tokens[self.idx].val
         self.idx += 1
         return num
 
     def parse_int_literal_u(self):
-        num = Binary(sc.TokenType.INT_LIT, self.tokens[self.idx].val, None, None)
+        num = Binary(sc.TokenType.INT_LIT,
+                     self.tokens[self.idx].val,
+                     None,
+                     None)
         num.val = self.tokens[self.idx].val
         self.idx += 1
         return num
-        pass
 
     def parse_paren_expr_u(self):
-        num = Binary(sc.TokenType.INT_LIT, self.tokens[self.idx].val, None, None)
+        num = Binary(sc.TokenType.INT_LIT,
+                     self.tokens[self.idx].val,
+                     None,
+                     None)
         num.val = self.tokens[self.idx].val
         self.idx += 1
         return num
-        pass
 
     def parse_primary_expr(self):
         match self.tokens[self.idx].valType:
             case sc.TokenType.IDENT:
                 return self.parse_identifier_u()
             case sc.TokenType.INT_LIT:
+                print(f"{self.tokens[self.idx].valType}")
                 return self.parse_int_literal_u()
             case sc.TokenType.OPEN_PAREN:
                 return self.parse_paren_expr_u()
@@ -175,6 +194,7 @@ class parser():
         lhs = self.parse_primary_expr()
         if lhs is None:
             return None
+        print(f"{lhs.val}")
         return self.parse_binop_expr(0, lhs)
 
     def parse_return_statement(self):
@@ -190,6 +210,10 @@ class parser():
             case sc.TokenType.OPEN_BRACK:
                 return self.parse_compound_statement()
             case sc.TokenType.INT_LIT:
+                return self.parse_expr()
+            case sc.TokenType.INT:
+                return self.parse_var_assignment()
+            case sc.TokenType.IDENT:
                 return self.parse_expr()
             case sc.TokenType.RETURN:
                 return self.parse_return_statement()

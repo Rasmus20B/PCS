@@ -1,6 +1,4 @@
-int add();
-
 int add() {
-  4 + 2;
+  int x = 4 + 2;
   return 2 + 5 + 4;
 }

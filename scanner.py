@@ -103,6 +103,9 @@ def scan(prog: progText):
             case "*":
                 t = Token(valType=TokenType.MUL, val="*")
                 tokens.append(t)
+            case "=":
+                t = Token(valType=TokenType.EQ, val="=")
+                tokens.append(t)
             case "&":
                 if prog.nextTok() == "&":
                     t = Token(valType=TokenType.LOG_AND, val="&")

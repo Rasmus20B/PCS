@@ -286,7 +286,7 @@ class parser():
                 case _:
                     print(f"Invalid token: {a.valType}")
                     exit()
-        self.print_tree()
+        # self.print_tree()
 
     def statement(self):
         pass

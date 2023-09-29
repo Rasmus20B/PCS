@@ -11,20 +11,16 @@ class codegen():
     buffer: str
 
     def emit_unary_expr(self, e):
-        print(f"op: {e.val}")
         if type(e) == pr.Unary and e.child is not None:
             if type(e.child) == pr.Unary:
                 self.emit_unary_expr(e.child)
             if type(e.child) == pr.Binary:
-                print("found BINARY inside unary")
                 self.emit_binary_expr(e.child)
 
     def emit_binary_expr(self, e):
         if type(e) == pr.Binary and e.child2 is not None:
-            print("going right")
             self.emit_binary_expr(e.child2)
         if type(e) == pr.Binary and e.child1 is not None:
-            print("going left")
             self.emit_binary_expr(e.child1)
         if type(e) == pr.Binary:
             match e.operand:
@@ -34,22 +30,18 @@ class codegen():
                     self.buffer += "addi\n"
                 case sc.TokenType.INT_LIT:
                     self.buffer += f"pushi {e.val}\n"
-            print(f"op: {e.val}")
 
         if type(e) == pr.Unary:
             self.emit_unary_expr(e)
 
     def emit_compound(self, cs):
-        print("Compound Statement:")
+        self.buffer += "start:\n"
         for s in cs.children:
-            print(f"statement has {type(s)} expression")
             if not s:
                 break
             elif type(s) == pr.Unary:
-                print("Found Unary Expr")
                 self.emit_unary_expr(s)
             elif type(s) == pr.Binary:
-                print("Found Binary Expr")
                 self.emit_binary_expr(s)
 
     def emit_program(self):
@@ -58,10 +50,7 @@ class codegen():
                 match ci.ttype:
                     case sc.TokenType.FUNC_DECL:
                         if not ci.child:
-                            print(f"Found Function Declaration: \
-                                  {ci.val} -> {ci.etype}")
+                            pass
                         else:
-                            print(f"Found Function Definition: \
-                                  {ci.val} -> {ci.etype}")
                             self.emit_compound(ci.child)
         print(self.buffer)

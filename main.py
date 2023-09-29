@@ -5,6 +5,7 @@ import argparse
 import scanner
 import parser
 import codegen
+import asm
 
 
 def main():
@@ -21,14 +22,17 @@ def main():
 
     parse.parse_program()
 
-    emitter = codegen.codegen(parse.ast)
+    assembly = codegen.codegen(parse.ast)
 
-    emitter.emit_program()
+    assembly.emit_program()
+
+    output = asm.gen_bytecode(assembly.buffer)
+
+    print(output)
 
     if args.output:
-        with open(args.output, "w") as f:
-            for i in tokens:
-                f.write(str(i.valType.value))
+        with open(args.output, "wb") as f:
+            f.write(bytes(output))
 
 
 if __name__ == "__main__":

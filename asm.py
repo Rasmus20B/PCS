@@ -375,6 +375,10 @@ def translate(progtext) -> []:
     return dml
 
 
+def gen_bytecode(code: str):
+    return translate(code)
+
+
 def main():
     argparser = argparse.ArgumentParser()
     argparser.add_argument("inputFile", type=str)

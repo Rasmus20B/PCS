@@ -50,6 +50,9 @@ class TokenType(Enum):
     GR = 27
     LEQ = 28
     GEQ = 29
+    RETURN = 30
+    ASYNC = 31
+    FUNC_DECL = 32
 
 
 class Token:
@@ -89,24 +92,24 @@ def scan(prog: progText):
                 t = Token(valType=TokenType.SEMICOL, val="")
                 tokens.append(t)
             case "+":
-                t = Token(valType=TokenType.ADD, val="")
+                t = Token(valType=TokenType.ADD, val="+")
                 tokens.append(t)
             case "-":
-                t = Token(valType=TokenType.SUB, val="")
+                t = Token(valType=TokenType.SUB, val="-")
                 tokens.append(t)
             case "/":
-                t = Token(valType=TokenType.DIV, val="")
+                t = Token(valType=TokenType.DIV, val="/")
                 tokens.append(t)
             case "*":
-                t = Token(valType=TokenType.MUL, val="")
+                t = Token(valType=TokenType.MUL, val="*")
                 tokens.append(t)
             case "&":
                 if prog.nextTok() == "&":
-                    t = Token(valType=TokenType.LOG_AND, val="")
+                    t = Token(valType=TokenType.LOG_AND, val="&")
                     tokens.append(t)
                     continue
                 else:
-                    t = Token(valType=TokenType.BIT_AND, val="")
+                    t = Token(valType=TokenType.BIT_AND, val="&&")
                     tokens.append(t)
                     continue
             case "%":
@@ -136,13 +139,16 @@ def scan(prog: progText):
                                               "{", "}", "EOF"]:
                             match cur:
                                 case "int":
-                                    t = Token(valType=TokenType.INT, val="")
+                                    t = Token(valType=TokenType.INT, val="int")
                                     tokens.append(t)
                                 case "void":
-                                    t = Token(valType=TokenType.VOID, val="")
+                                    t = Token(valType=TokenType.VOID, val="void")
                                     tokens.append(t)
                                 case "float":
-                                    t = Token(valType=TokenType.FLOAT, val="")
+                                    t = Token(valType=TokenType.FLOAT, val="float")
+                                    tokens.append(t)
+                                case "return":
+                                    t = Token(valType=TokenType.RETURN, val="return")
                                     tokens.append(t)
                                 case _:
                                     t = Token(valType=TokenType.IDENT, val=cur)

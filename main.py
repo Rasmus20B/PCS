@@ -18,7 +18,7 @@ def main():
     tokens = scanner.scan(content)
     parse = parser.parser(tokens)
 
-    parse.parse_root()
+    parse.parse_program()
 
     if args.output:
         with open(args.output, "w") as f:

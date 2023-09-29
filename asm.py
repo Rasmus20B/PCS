@@ -341,6 +341,7 @@ def tokenize(progtext):
                 print("Error @{i}: Label already defined")
                 exit()
             labels[label[:-1]] = addr
+            print(f"Label {label} @ {hex(addr + 8)}")
         else:
             # regaular case
             code += assemble(opcode, operands)

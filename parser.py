@@ -1,71 +1,39 @@
 import scanner as sc
 from typing import List
 
+precedence = {
+        sc.TokenType.IDENT: -1,
+        sc.TokenType.INT_LIT: -1,
+        sc.TokenType.SEMICOL: -1,
+        sc.TokenType.ADD: 1,
+        }
 
-class Node:
+
+class Node(object):
     def __init__():
         pass
 
 
-class Root(Node):
-    def __init__(self):
-        self.children = []
-
-    def add(self, child):
-        self.children.append(child)
-    children: []
-
-
-class Compound(Node):
-    def __init__(self):
-        self.children = []
-    children: []
-
-
-class Decl_Statement(Node):
-    def __init__(self, expr):
-        self.child = expr
-        pass
-
-    child: Node
-
-
-class Func_Decl(Node):
-    def __init__(self, t, n, a):
-        self.ftype = t
-        self.name = n
-        self.args = a
-        self.child = ""
-
-    ftype: str
-    name: str
-    args: []
-    child: Compound
-
-
-class lit_int(Node):
-    def __init__(self, val):
-        self.val = val
-    val: int
-
-
-class expr_statement(Node):
-    def __init__(self, series):
-        self.expr = []
-    expr: []
-
-
 class Unary(Node):
+    def __init__(self, child, ttype, etype, val):
+        self.ttype = ttype
+        self.child = child
+        self.etype = etype
+        self.val = val
     child: Node
+    ttype: sc.TokenType
+    etype: str
+    val: str
 
 
 class Binary(Node):
-    def __init__(self, op, c1, c2):
+    def __init__(self, op, val, c1, c2):
         self.operand = op
+        self.val = val
         self.child1 = c1
         self.child2 = c2
-
     operand: str
+    val: str
     child1: Node
     child2: Node
 
@@ -81,6 +49,11 @@ class Ternary(Node):
     child3: Node
 
 
+class Nary(Node):
+    children = [Node]
+    ttype: sc.TokenType
+
+
 class parser():
     symbols = []
     labels = []
@@ -88,184 +61,213 @@ class parser():
     idx: int = 0
     tokens = List[sc.Token]
     buffer = str
-
-    ast = []
+    ast = Nary
+    stack: []
 
     def __init__(self, tokens: List[sc.Token]):
         self.tokens = tokens
 
-    def parse_expr(self, index):
-        print(f"{self.tokens[index].valType}, {self.tokens[index].val}")
-        index += 1
-        match self.tokens[index].valType:
-            case sc.TokenType.SEMICOL:
-                return index, lit_int(self.tokens[index].val)
-            case sc.TokenType.ADD:
-                self.nextToken()
-                o2 = self.peek()
-                index += 3
-                return index, Binary("Add", lit_int(self.tokens[index].val), lit_int(o2.val))
-            case sc.TokenType.EOF:
-                return index, None
-            case _:
-                print("Unrecognized expression")
+    def print_unary_expr(self, e):
+        print(f"op: {e.val}")
+        if type(e) == Unary and e.child is not None:
+            if type(e.child) == Unary:
+                self.print_unary_expr(e.child)
+            if type(e.child) == Binary:
+                print("found BINARY inside unary")
+                self.print_binary_expr(e.child)
 
-    def parse_expr_statement(self, index):
-        while self.tokens[index].valType is not sc.TokenType.SEMICOL:
-            index, expr = self.parse_expr(index)
+    def print_binary_expr(self, e):
+        print(f"op: {e.val}")
+        if type(e) == Binary and e.child1 is not None:
+            print("going left")
+            self.print_binary_expr(e.child1)
+        if type(e) == Binary and e.child2 is not None:
+            print("going right")
+            self.print_binary_expr(e.child2)
 
-    def parse_statement(self, index):
-        if self.tokens[index].valType == sc.TokenType.EOF:
-            return index, None
-        match self.tokens[index].valType:
-            case sc.TokenType.SEMICOL:
-                return index, None
-            case sc.TokenType.EOF:
-                return index, None
-            case sc.TokenType.INT_LIT:
-                index, expr = self.parse_expr(index)
-                if expr is None:
-                    return index, None
-                return index, Decl_Statement(expr)
-            case sc.TokenType.IDENT:
-                index, expr = self.parse_expr(index)
-                if expr is None:
-                    return index, None
-                return index, Decl_Statement(expr)
-            case sc.TokenType.CLOSE_BRACK:
-                return index, None
-            case _:
-                print("Unrecognized statement")
-                return index, None
-        return index, Decl_Statement()
+        if type(e) == Unary:
+            self.print_unary_expr(e)
 
-    def parse_compound_statement(self, index):
-        comp = Compound()
-        while True:
-            index, stat = self.parse_statement(index)
-            if stat:
-                comp.children.append(stat)
-            else:
+    def print_compound(self, cs):
+        print("Compound Statement:")
+        for s in cs.children:
+            print(f"statement has {type(s)} expression")
+            if not s:
                 break
+            elif type(s) == Unary:
+                print("Found Unary Expr")
+                self.print_unary_expr(s)
+            elif type(s) == Binary:
+                print("Found Binary Expr")
+                self.print_binary_expr(s)
 
-        print(f"Statements in compound : {len(comp.children)}")
-        # while self.tokens[index].valType is not sc.TokenType.CLOSE_BRACK:
-        #     index += 1
-        index += 1
-        return index, comp
+    def print_tree(self):
+        for ci in self.ast.children:
+            if type(ci) == Unary:
+                match ci.ttype:
+                    case sc.TokenType.FUNC_DECL:
+                        if not ci.child:
+                            print(f"Found Function Declaration: \
+                                  {ci.val} -> {ci.etype}")
+                        else:
+                            print(f"Found Function Definition: \
+                                  {ci.val} -> {ci.etype}")
+                            self.print_compound(ci.child)
 
-    def parse_func_Decl(self, index):
-        # TODO: Implement specifiers and more types
-        fun = Func_Decl("", "", "")
-        match self.tokens[index].valType:
-            case sc.TokenType.EOF:
-                return index, fun
-            case sc.TokenType.INT:
-                fun.ftype = "int"
-            case sc.TokenType.VOID:
-                fun.ftype = "void"
-            case sc.TokenType.FLOAT:
-                fun.ftype = "int"
-            case _:
-                print(f"Unrecognized type specifier: \
-                        {self.tokens[index].valType}")
-                index += 1
-                return index, fun
-        index += 1
+    def parse_var_assignment(self):
+        pass
 
-        match self.tokens[index].valType:
+    def parse_identifier_u(self):
+        num = Binary(sc.TokenType.IDENT, self.tokens[self.idx].val, None, None)
+        self.idx += 1
+        return num
+
+    def parse_int_literal_u(self):
+        num = Binary(sc.TokenType.INT_LIT, self.tokens[self.idx].val, None, None)
+        num.val = self.tokens[self.idx].val
+        self.idx += 1
+        return num
+        pass
+
+    def parse_paren_expr_u(self):
+        num = Binary(sc.TokenType.INT_LIT, self.tokens[self.idx].val, None, None)
+        num.val = self.tokens[self.idx].val
+        self.idx += 1
+        return num
+        pass
+
+    def parse_primary_expr(self):
+        match self.tokens[self.idx].valType:
             case sc.TokenType.IDENT:
-                fun.name = self.tokens[index].val
+                return self.parse_identifier_u()
+            case sc.TokenType.INT_LIT:
+                return self.parse_int_literal_u()
+            case sc.TokenType.OPEN_PAREN:
+                return self.parse_paren_expr_u()
             case _:
-                print("Expected Identifier for function")
+                print("Error: Invalid Token for expression")
+        pass
 
-        while self.tokens[index].valType \
-                not in [sc.TokenType.SEMICOL,
-                        sc.TokenType.OPEN_BRACK, sc.TokenType.EOF]:
-            index += 1
-        match self.tokens[index].valType:
-            case sc.TokenType.SEMICOL:
-                index += 1
-                return index, fun
-            case sc.TokenType.OPEN_BRACK:
-                index += 1
-                index, fun.child = self.parse_compound_statement(index)
-                pass
-
-        return index, fun
-
-    def parse_root(self):
+    def parse_binop_expr(self, prec: int, lhs: Node) -> Binary:
         while True:
-            self.idx, func = self.parse_func_Decl(self.idx)
-            if func.name != "":
-                self.ast.append(func)
-            match self.tokens[self.idx].valType:
+            t1 = self.tokens[self.idx].valType
+            v1 = self.tokens[self.idx].val
+            p1 = precedence[self.tokens[self.idx].valType]
+            if p1 < prec:
+                return lhs
+
+            self.idx += 1
+
+            rhs = self.parse_primary_expr()
+
+            if not rhs:
+                return None
+
+            p2 = precedence[self.tokens[self.idx].valType]
+            if p1 < p2:
+                rhs = self.parse_binop_expr(p1 + 1, rhs)
+                if not rhs:
+                    return None
+
+            lhs = Binary(t1, v1, lhs, rhs)
+
+    def parse_expr(self):
+        lhs = self.parse_primary_expr()
+        if lhs is None:
+            return None
+        return self.parse_binop_expr(0, lhs)
+
+    def parse_return_statement(self):
+        self.idx += 1
+        return Unary(self.parse_expr(),
+                     sc.TokenType.RETURN,
+                     sc.TokenType.RETURN,
+                     "return")
+
+    def parse_statement(self):
+        a = self.nextToken()
+        match a.valType:
+            case sc.TokenType.OPEN_BRACK:
+                return self.parse_compound_statement()
+            case sc.TokenType.INT_LIT:
+                return self.parse_expr()
+            case sc.TokenType.RETURN:
+                return self.parse_return_statement()
+            case sc.TokenType.CLOSE_BRACK:
+                return
+            case _:
+                print("Error: Invalid statement")
+                exit()
+
+    def parse_compound_statement(self):
+        cs = Nary
+        while self.tokens[self.idx].valType != sc.TokenType.CLOSE_BRACK:
+            cs.children.append(self.parse_statement())
+        self.idx += 1
+        return cs
+
+    def parse_func_decl(self, ident: str, ftype: str):
+        while self.tokens[self.idx].valType != sc.TokenType.CLOSE_PAREN:
+            self.idx += 1
+        self.idx += 1
+        match self.tokens[self.idx].valType:
+            case sc.TokenType.OPEN_BRACK:
+                return Unary(self.parse_compound_statement(),
+                             sc.TokenType.FUNC_DECL,
+                             ftype,
+                             ident)
+            case sc.TokenType.SEMICOL:
+                return Unary(None,
+                             sc.TokenType.FUNC_DECL,
+                             ftype,
+                             ident)
+            case _:
+                return None
+        pass
+
+    def parse_identifier(self, fname, ftype):
+        a = self.nextToken()
+        match a.valType:
+            case sc.TokenType.SEMICOL:
+                return None
+            case sc.TokenType.OPEN_PAREN:
+                if fname:
+                    return self.parse_func_decl(fname, ftype)
+                else:
+                    while self.tokens[self.idx] != sc.TokenType.CLOSE_PAREN:
+                        self.idx += 1
+            case sc.TokenType.EQ:
+                return self.parse_var_assignment()
+            case _:
+                return None
+
+    def parse_int(self):
+        a = self.nextToken()
+        match a.valType:
+            case sc.TokenType.IDENT:
+                return self.parse_identifier(a.val, "int")
+            case _:
+                print(f"Error: {a.val} is not an valid identifier")
+                exit()
+        pass
+
+    def parse_program(self):
+        while True:
+            a: sc.Token = self.tokens[self.idx]
+            print(f"top level {self.idx} valtype: {a.valType}")
+            match a.valType:
+                case sc.TokenType.EOF:
+                    break
+                case sc.TokenType.INT:
+                    self.ast.children.append(self.parse_int())
+                    continue
                 case sc.TokenType.SEMICOL:
                     self.idx += 1
                     continue
-                case sc.TokenType.OPEN_BRACK:
-                    self.idx += 1
-                    self.idx, s = self.parse_compound_statement(self.idx)
-                    func.child = s
-                    continue
-                case sc.TokenType.EOF:
-                    break
-
-        for decl in self.ast:
-            print(f"Found func decl for: {decl.name} := {decl.ftype} ")
-            c: Compound = decl.child
-            if (c):
-                print("compound statement:")
-                for com in c.children:
-                    print(f"statement: {com.child}")
-                    if type(com.child) == Binary:
-                        print(f"{com.child.child1} \
-                                {com.child.operand} \
-                                {com.child.child2}")
-
-    def parse(self):
-        a: sc.Token = self.peek()
-        while a.valType is not sc.TokenType.EOF:
-            match a:
-                case sc.TokenType.VOID:
-                    self.declaration()
-                    continue
-                case sc.TokenType.INT:
-                    self.declaration()
-                    continue
-                case sc.TokenType.FLOAT:
-                    self.declaration()
-                    continue
-                case sc.TokenType.IDENT:
-                    self.ident()
-                    continue
-            a = self.nextToken()
-
-    def ident(self):
-        match self.nextToken():
-            case sc.TokenType.OPEN_PAREN:
-                self.function_call()
-            case sc.TokenType.EQ:
-                self.assignment()
-
-    def assignment(self):
-        pass
-
-    def function_call(self):
-        while self.nextToken().valType is not sc.TokenType.CLOSE_PAREN:
-            pass
-
-    def declaration(self):
-        a = self.nextToken()
-        match a:
-            case sc.TokenType.IDENT:
-                match self.nextToken().valType:
-                    case sc.TokenType.OPEN_PAREN:
-                        self.function_call()
-                pass
-            case _:
-                print(f"Unexpected Token: {a.valType}")
-                return 3
+                case _:
+                    print(f"Invalid token: {a.valType}")
+                    exit()
+        self.print_tree()
 
     def statement(self):
         pass

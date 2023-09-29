@@ -4,6 +4,7 @@ import argparse
 
 import scanner
 import parser
+import codegen
 
 
 def main():
@@ -19,6 +20,10 @@ def main():
     parse = parser.parser(tokens)
 
     parse.parse_program()
+
+    emitter = codegen.codegen(parse.ast)
+
+    emitter.emit_program()
 
     if args.output:
         with open(args.output, "w") as f:

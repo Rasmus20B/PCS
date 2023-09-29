@@ -44,7 +44,6 @@ class Ternary(Node):
         self.child1 = c1
         self.child2 = c2
         self.child3 = c3
-
     child1: Node
     child2: Node
     child3: Node
@@ -118,7 +117,6 @@ class parser():
 
     def parse_var_assignment(self):
         self.nextToken()
-        print(f"variable name = {self.tokens[self.idx].val}")
         lhs = self.parse_primary_expr()
         self.nextToken()
         return Binary(sc.TokenType.EQ,
@@ -159,7 +157,6 @@ class parser():
             case sc.TokenType.IDENT:
                 return self.parse_identifier_u()
             case sc.TokenType.INT_LIT:
-                print(f"{self.tokens[self.idx].valType}")
                 return self.parse_int_literal_u()
             case sc.TokenType.OPEN_PAREN:
                 return self.parse_paren_expr_u()
@@ -194,7 +191,6 @@ class parser():
         lhs = self.parse_primary_expr()
         if lhs is None:
             return None
-        print(f"{lhs.val}")
         return self.parse_binop_expr(0, lhs)
 
     def parse_return_statement(self):
@@ -278,7 +274,6 @@ class parser():
     def parse_program(self):
         while True:
             a: sc.Token = self.tokens[self.idx]
-            print(f"top level {self.idx} valtype: {a.valType}")
             match a.valType:
                 case sc.TokenType.EOF:
                     break

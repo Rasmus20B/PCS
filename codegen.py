@@ -8,7 +8,10 @@ class codegen():
         self.buffer = ""
 
     tree: pr.parser.ast
-    buffer: str
+    buffer = ""
+    functions = {}
+    variables = {}
+    var_count = 0
 
     def emit_unary_expr(self, e):
         if type(e) == pr.Unary and e.child is not None:
@@ -17,11 +20,17 @@ class codegen():
             if type(e.child) == pr.Binary:
                 self.emit_binary_expr(e.child)
 
+        match e.ttype:
+            case sc.TokenType.RETURN:
+                self.buffer += "ret"
+
     def emit_binary_expr(self, e):
         if type(e) == pr.Binary and e.child2 is not None:
             self.emit_binary_expr(e.child2)
+
         if type(e) == pr.Binary and e.child1 is not None:
             self.emit_binary_expr(e.child1)
+
         if type(e) == pr.Binary:
             match e.operand:
                 case sc.TokenType.EQ:
@@ -33,7 +42,6 @@ class codegen():
 
         if type(e) == pr.Unary:
             self.emit_unary_expr(e)
-
     def emit_compound(self, cs):
         self.buffer += "start:\n"
         for s in cs.children:

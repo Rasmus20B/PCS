@@ -6,7 +6,7 @@ precedence = {
         sc.TokenType.INT_LIT: -1,
         sc.TokenType.SEMICOL: -1,
         sc.TokenType.EQ: -1,
-        sc.TokenType.ADD: 1,
+        sc.TokenType.ADD: 10,
         }
 
 
@@ -85,7 +85,6 @@ class parser():
         if type(e) == Binary and e.child2 is not None:
             print("going right")
             self.print_binary_expr(e.child2)
-
         if type(e) == Unary:
             self.print_unary_expr(e)
 
@@ -184,8 +183,7 @@ class parser():
                 rhs = self.parse_binop_expr(p1 + 1, rhs)
                 if not rhs:
                     return None
-
-            lhs = Binary(t1, v1, lhs, rhs)
+            lhs = Binary(t1, v1, rhs, lhs)
 
     def parse_expr(self):
         lhs = self.parse_primary_expr()
@@ -286,7 +284,7 @@ class parser():
                 case _:
                     print(f"Invalid token: {a.valType}")
                     exit()
-        # self.print_tree()
+        self.print_tree()
 
     def statement(self):
         pass

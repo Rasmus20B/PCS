@@ -69,23 +69,23 @@ class parser():
 
     def print_unary_expr(self, e):
         print(f"op: {e.val}")
-        if type(e) == Unary and e.child is not None:
-            if type(e.child) == Unary:
+        if type(e) is Unary and e.child is not None:
+            if type(e.child) is Unary:
                 self.print_unary_expr(e.child)
-            if type(e.child) == Binary:
+            if type(e.child) is Binary:
                 print("found BINARY inside unary")
                 self.print_binary_expr(e.child)
 
     def print_binary_expr(self, e):
-        if type(e) == Binary:
+        if type(e) is Binary:
             print(f"op: {e.val}")
-        if type(e) == Binary and e.child1 is not None:
+        if type(e) is Binary and e.child1 is not None:
             print("going left")
             self.print_binary_expr(e.child1)
-        if type(e) == Binary and e.child2 is not None:
+        if type(e) is Binary and e.child2 is not None:
             print("going right")
             self.print_binary_expr(e.child2)
-        if type(e) == Unary:
+        if type(e) is Unary:
             self.print_unary_expr(e)
 
     def print_compound(self, cs):
@@ -94,16 +94,16 @@ class parser():
             print(f"statement has {type(s)} expression")
             if not s:
                 break
-            elif type(s) == Unary:
+            elif type(s) is Unary:
                 print("Found Unary Expr")
                 self.print_unary_expr(s)
-            elif type(s) == Binary:
+            elif type(s) is Binary:
                 print("Found Binary Expr")
                 self.print_binary_expr(s)
 
     def print_tree(self):
         for ci in self.ast.children:
-            if type(ci) == Unary:
+            if type(ci) is Unary:
                 match ci.ttype:
                     case sc.TokenType.FUNC_DECL:
                         if not ci.child:

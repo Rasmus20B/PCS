@@ -142,16 +142,20 @@ def scan(prog: progText):
                                               "{", "}", "EOF"]:
                             match cur:
                                 case "int":
-                                    t = Token(valType=TokenType.INT, val="int")
+                                    t = Token(valType=TokenType.INT,
+                                              val="int")
                                     tokens.append(t)
                                 case "void":
-                                    t = Token(valType=TokenType.VOID, val="void")
+                                    t = Token(valType=TokenType.VOID,
+                                              val="void")
                                     tokens.append(t)
                                 case "float":
-                                    t = Token(valType=TokenType.FLOAT, val="float")
+                                    t = Token(valType=TokenType.FLOAT,
+                                              val="float")
                                     tokens.append(t)
                                 case "return":
-                                    t = Token(valType=TokenType.RETURN, val="return")
+                                    t = Token(valType=TokenType.RETURN,
+                                              val="return")
                                     tokens.append(t)
                                 case _:
                                     t = Token(valType=TokenType.IDENT, val=cur)

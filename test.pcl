@@ -5,3 +5,7 @@ int add() {
   int y = x + 2;
   return 4 + 2 + 6;
 }
+
+int main() {
+  add();
+}

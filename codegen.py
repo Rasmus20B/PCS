@@ -1,5 +1,6 @@
 import parser as pr
 import scanner as sc
+import intrins as ins
 
 
 class codegen():
@@ -58,6 +59,7 @@ class codegen():
             if type(ci) is pr.Unary:
                 match ci.ttype:
                     case sc.TokenType.FUNC_DECL:
+                        print(f"Function: {ci.val} -> {ci.ttype} ")
                         if not ci.child:
                             pass
                         else:

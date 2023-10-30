@@ -18,6 +18,12 @@ def main():
         content = scanner.progText(f.read())
 
     tokens = scanner.scan(content)
+
+    for t in tokens:
+      print(t.valType)
+
+
+    print("PARSING===================")
     parse = parser.parser(tokens)
 
     parse.parse_program()

@@ -124,14 +124,40 @@ class parser():
                       self.parse_binop_expr(0, self.parse_primary_expr())
                       )
 
-    def parse_identifier_u(self):
-        num = Binary(sc.TokenType.IDENT,
-                     self.tokens[self.idx].val,
-                     None,
-                     None)
-        num.val = self.tokens[self.idx].val
+    args = 0
+    def parse_f_args(self):
+        self.args += 1
         self.idx += 1
-        return num
+        t = self.tokens[self.idx]
+        if t.valType == sc.TokenType.COMMA:
+            self.idx += 1
+            t = self.tokens[self.idx]
+        print(f"looking at: {t.valType}")
+        if t.valType not in {sc.TokenType.CLOSE_PAREN,
+                             sc.TokenType.COMMA}:
+            ptype = t.valType
+            return Unary(self.parse_f_args(), ptype, sc.TokenType.IDENT, t.val)
+        else:
+            self.idx += 1
+            return
+
+    def parse_identifier_u(self):
+        print(self.peek().valType)
+        if self.peek().valType == sc.TokenType.OPEN_PAREN:
+            self.idx += 1
+            func = Binary(sc.TokenType.FUNC_CALL,
+                          self.tokens[self.idx].val,
+                          self.tokens[self.idx].val,
+                          self.parse_f_args())
+            return func
+        else:
+            num = Binary(sc.TokenType.IDENT,
+                         self.tokens[self.idx].val,
+                         None,
+                         None)
+            num.val = self.tokens[self.idx].val
+            self.idx += 1
+            return num
 
     def parse_int_literal_u(self):
         num = Binary(sc.TokenType.INT_LIT,
@@ -161,6 +187,9 @@ class parser():
                 return self.parse_paren_expr_u()
             case _:
                 print("Error: Invalid Token for expression")
+        pass
+
+    def parse_ternary_expr(self):
         pass
 
     def parse_binop_expr(self, prec: int, lhs: Node) -> Binary:
@@ -249,8 +278,10 @@ class parser():
             case sc.TokenType.SEMICOL:
                 return None
             case sc.TokenType.OPEN_PAREN:
-                if fname:
+                if fname and ftype:
                     return self.parse_func_decl(fname, ftype)
+                elif fname:
+                    print("FOUND A FUNC DEF")
                 else:
                     while self.tokens[self.idx] != sc.TokenType.CLOSE_PAREN:
                         self.idx += 1
@@ -284,7 +315,7 @@ class parser():
                 case _:
                     print(f"Invalid token: {a.valType}")
                     exit()
-        self.print_tree()
+        # self.print_tree()
 
     def statement(self):
         pass

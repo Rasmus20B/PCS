@@ -34,24 +34,11 @@ pushi 0
 pushi 3
 pushi 3
 pushi 3
+movePos 100 100
 anmSetSprite 0 0
-movePosTime 80 0 300 400
-call shoot1
-wait 10
-call shoot1
-wait 10
-call shoot1
-wait 10
-movePosTime 200 0 700 400
-wait 200
-call shoot2
+movePosTime 200 0 300 400
+callasync shootpat
 wait 20
-movePosTime 60 0 800 400
-call shoot2
-wait 20
-call shoot2
-wait 60
-movePosTime 120 0 3000 400
 delete
 enemy1:
 pushi 0
@@ -79,4 +66,5 @@ pushi 1
 pushi 2
 pushi 2
 enmCreate enemy1 700 40 1 0 0
+enmCreate enemy2 100 40 1 0 0
 wait 10000

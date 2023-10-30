@@ -6,6 +6,10 @@ int add() {
   return 4 + 2 + 6;
 }
 
+int add1(int a, int b) {
+  return a + b;
+}
+
 int main() {
-  add();
+  add(1, 2);
 }

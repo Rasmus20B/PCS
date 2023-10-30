@@ -53,6 +53,7 @@ class TokenType(Enum):
     RETURN = 30
     ASYNC = 31
     FUNC_DECL = 32
+    FUNC_CALL = 33
 
 
 class Token:
@@ -127,7 +128,7 @@ def scan(prog: progText):
                     while prog.curTok().isnumeric():
                         cur += prog.curTok()
                         if prog.nextTok() in [" ", "\t", "\n", "(", ")", "{",
-                                              "}", "EOF", "f", ";"]:
+                                              "}", ",", "EOF", "f", ";"]:
                             if prog.curTok() == "f":
                                 t = Token(valType=TokenType.FLOAT_LIT, val=cur)
                             else:
@@ -139,7 +140,7 @@ def scan(prog: progText):
                     while (prog.curTok().isalnum()):
                         cur += prog.curTok()
                         if prog.nextTok() in [" ", "\t", "\n", "(", ")",
-                                              "{", "}", "EOF"]:
+                                              "{", "}", ",", "EOF"]:
                             match cur:
                                 case "int":
                                     t = Token(valType=TokenType.INT,

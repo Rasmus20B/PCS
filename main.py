@@ -28,7 +28,7 @@ def main():
 
     parse.parse_program()
 
-    assembly = codegen.codegen(parse.ast)
+    assembly = codegen.codegen(parse)
 
     assembly.emit_program()
 

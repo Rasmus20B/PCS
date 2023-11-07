@@ -1,4 +1,5 @@
 import scanner as sc
+import func as fn
 from typing import List
 
 precedence = {
@@ -7,6 +8,9 @@ precedence = {
         sc.TokenType.SEMICOL: -1,
         sc.TokenType.EQ: -1,
         sc.TokenType.ADD: 10,
+        sc.TokenType.MUL: 11,
+        sc.TokenType.SUB: 15,
+        sc.TokenType.DIV: 20,
         }
 
 
@@ -50,14 +54,16 @@ class Ternary(Node):
 
 
 class Nary(Node):
-    children = [Node]
+    def __init__(self, ch):
+        self.children = ch
+    children = []
     ttype: sc.TokenType
 
 
 class parser():
     symbols = []
     labels = []
-    functions = []
+    functions = {}
     idx: int = 0
     tokens = List[sc.Token]
     buffer = str
@@ -88,10 +94,9 @@ class parser():
         if type(e) is Unary:
             self.print_unary_expr(e)
 
-    def print_compound(self, cs):
+    def print_compound(self, ch):
         print("Compound Statement:")
-        for s in cs.children:
-            print(f"statement has {type(s)} expression")
+        for s in ch.children:
             if not s:
                 break
             elif type(s) is Unary:
@@ -104,6 +109,7 @@ class parser():
     def print_tree(self):
         for ci in self.ast.children:
             if type(ci) is Unary:
+                print(ci)
                 match ci.ttype:
                     case sc.TokenType.FUNC_DECL:
                         if not ci.child:
@@ -123,8 +129,8 @@ class parser():
                       lhs,
                       self.parse_binop_expr(0, self.parse_primary_expr())
                       )
-
     args = 0
+
     def parse_f_args(self):
         self.args += 1
         self.idx += 1
@@ -132,7 +138,6 @@ class parser():
         if t.valType == sc.TokenType.COMMA:
             self.idx += 1
             t = self.tokens[self.idx]
-        print(f"looking at: {t.valType}")
         if t.valType not in {sc.TokenType.CLOSE_PAREN,
                              sc.TokenType.COMMA}:
             ptype = t.valType
@@ -142,14 +147,12 @@ class parser():
             return
 
     def parse_identifier_u(self):
-        print(self.peek().valType)
         if self.peek().valType == sc.TokenType.OPEN_PAREN:
             self.idx += 1
-            func = Binary(sc.TokenType.FUNC_CALL,
-                          self.tokens[self.idx].val,
-                          self.tokens[self.idx].val,
+            return Binary(sc.TokenType.FUNC_CALL,
+                          self.tokens[self.idx - 1].val,
+                          self.tokens[self.idx - 1].val,
                           self.parse_f_args())
-            return func
         else:
             num = Binary(sc.TokenType.IDENT,
                          self.tokens[self.idx].val,
@@ -247,7 +250,11 @@ class parser():
                 exit()
 
     def parse_compound_statement(self):
-        cs = Nary
+
+        # recall the cs constructor on each function call.
+        # reference count from return will cause it to be
+        # persistent between calls.
+        cs = Nary([])
         while self.tokens[self.idx].valType != sc.TokenType.CLOSE_BRACK:
             cs.children.append(self.parse_statement())
         self.idx += 1
@@ -257,6 +264,9 @@ class parser():
         while self.tokens[self.idx].valType != sc.TokenType.CLOSE_PAREN:
             self.idx += 1
         self.idx += 1
+
+        # add function symbol
+        self.functions[ident] = fn.function(ftype, 0, {})
         match self.tokens[self.idx].valType:
             case sc.TokenType.OPEN_BRACK:
                 return Unary(self.parse_compound_statement(),
@@ -281,7 +291,7 @@ class parser():
                 if fname and ftype:
                     return self.parse_func_decl(fname, ftype)
                 elif fname:
-                    print("FOUND A FUNC DEF")
+                    pass
                 else:
                     while self.tokens[self.idx] != sc.TokenType.CLOSE_PAREN:
                         self.idx += 1
@@ -298,30 +308,23 @@ class parser():
             case _:
                 print(f"Error: {a.val} is not an valid identifier")
                 exit()
-        pass
 
     def parse_program(self):
         while True:
             a: sc.Token = self.tokens[self.idx]
+            fun = 0
             match a.valType:
                 case sc.TokenType.EOF:
                     break
                 case sc.TokenType.INT:
-                    self.ast.children.append(self.parse_int())
-                    continue
+                    fun = self.parse_int()
+                    self.ast.children.append(fun)
                 case sc.TokenType.SEMICOL:
                     self.idx += 1
-                    continue
                 case _:
                     print(f"Invalid token: {a.valType}")
                     exit()
-        # self.print_tree()
-
-    def statement(self):
-        pass
-
-    def expression(self):
-        pass
+        self.print_tree()
 
     def nextToken(self) -> sc.Token:
         if self.idx < len(self.tokens) - 1:

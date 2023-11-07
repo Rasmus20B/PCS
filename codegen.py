@@ -4,11 +4,11 @@ import intrins as ins
 
 
 class codegen():
-    def __init__(self, tree: pr.parser.ast):
+    def __init__(self, tree: pr.parser):
         self.tree = tree
         self.buffer = ""
 
-    tree: pr.parser.ast
+    tree: pr.parser
     buffer = ""
     functions = {}
     variables = {}
@@ -23,7 +23,7 @@ class codegen():
 
         match e.ttype:
             case sc.TokenType.RETURN:
-                self.buffer += "ret"
+                self.buffer += "ret\n"
 
     def emit_binary_expr(self, e):
         if type(e) is pr.Binary and e.child2 is not None:
@@ -34,19 +34,21 @@ class codegen():
 
         if type(e) is pr.Binary:
             match e.operand:
+                case sc.TokenType.FUNC_CALL:
+                    self.buffer += f"call {e.child1}\n"
                 case sc.TokenType.EQ:
                     self.buffer += "seti 1\n"
                 case sc.TokenType.ADD:
                     self.buffer += "addi\n"
+                case sc.TokenType.MUL:
+                    self.buffer += "muli\n"
                 case sc.TokenType.INT_LIT:
                     self.buffer += f"pushi {e.val}\n"
-
         if type(e) is pr.Unary:
             self.emit_unary_expr(e)
 
-    def emit_compound(self, cs):
-        self.buffer += "start:\n"
-        for s in cs.children:
+    def emit_compound(self, ch):
+        for s in ch.children:
             if not s:
                 break
             elif type(s) is pr.Unary:
@@ -55,13 +57,14 @@ class codegen():
                 self.emit_binary_expr(s)
 
     def emit_program(self):
-        for ci in self.tree.children:
+        for ci in self.tree.ast.children:
             if type(ci) is pr.Unary:
                 match ci.ttype:
                     case sc.TokenType.FUNC_DECL:
                         print(f"Function: {ci.val} -> {ci.ttype} ")
                         if not ci.child:
-                            pass
+                            continue
                         else:
+                            self.buffer += f"{ci.val}:\n"
                             self.emit_compound(ci.child)
         print(self.buffer)

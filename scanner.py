@@ -140,7 +140,8 @@ def scan(prog: progText):
                     while (prog.curTok().isalnum()):
                         cur += prog.curTok()
                         if prog.nextTok() in [" ", "\t", "\n", "(", ")",
-                                              "{", "}", ",", "EOF"]:
+                                              "{", "}", ",", ";", "+", "-",
+                                              "*", "/" "EOF"]:
                             match cur:
                                 case "int":
                                     t = Token(valType=TokenType.INT,

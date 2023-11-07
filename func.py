@@ -2,7 +2,8 @@ import pcl_types
 
 
 class function:
-    def __init__(self, ret: pcl_types.pcl_type,
+    def __init__(self,
+                 ret: pcl_types.pcl_type,
                  argn: int,
                  arg_types: {}):
         self.ret_type = ret

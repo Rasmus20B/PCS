@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import struct
 
 
 class DWORD:
@@ -111,13 +112,19 @@ def assemble(opcode, operands) -> []:
             for s in par.segments:
                 code.append(s)
             par.clear()
-        case "seti":
+        case "set":
             code.append(0x00)
             code.append(0x2B)
             par = DWORD(operands[0])
             for s in par.segments:
                 code.append(s)
             par.clear()
+        case "pushf":
+            code.append(0x00)
+            code.append(0x2C)
+            par = struct.pack('<f', float(operands[0]))
+            for s in par:
+                code.append(s)
         case "addi":
             code.append(0x00)
             code.append(0x32)
@@ -314,6 +321,10 @@ def assemble(opcode, operands) -> []:
             for s in par.segments:
                 code.append(s)
             par.clear()
+
+        case "print":
+            code.append(0x03)
+            code.append(0xE7)
 
         case _:
             print(f"Unknown Opcode: {opcode}")

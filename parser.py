@@ -121,8 +121,12 @@ class parser():
                             self.print_compound(ci.child)
 
     def parse_var_assignment(self):
+
+        print("FOUND A VAR ASSIGNMENT")
         self.nextToken()
         lhs = self.parse_primary_expr()
+
+        print(f"{lhs.val}")
         self.nextToken()
         return Binary(sc.TokenType.EQ,
                       "=",
@@ -284,6 +288,7 @@ class parser():
 
     def parse_identifier(self, fname, ftype):
         a = self.nextToken()
+        print(fname)
         match a.valType:
             case sc.TokenType.SEMICOL:
                 return None

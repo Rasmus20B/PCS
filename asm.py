@@ -351,8 +351,8 @@ def tokenize(progtext):
             if label in labels:
                 print("Error @{i}: Label already defined")
                 exit()
-            labels[label[:-1]] = addr
-            print(f"Label {label} @ {hex(addr + 8)}")
+            labels[label[:-1]] = addr + 8
+            print(f"Label {label[:-1]} @ {hex(addr + 8)}")
         else:
             # regaular case
             code += assemble(opcode, operands)
@@ -371,11 +371,13 @@ def genHeader():
     ep = labels["start"]
 
     if ep:
+        print("WE FOUND START")
         par = DWORD(ep)
         for s in par.segments:
             header.append(s)
         par.clear()
 
+    print(header)
     return header
 
 

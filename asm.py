@@ -26,6 +26,8 @@ class DWORD:
 
 labels = {}
 
+variables = {}
+
 
 def assemble(opcode, operands) -> []:
     code = []
@@ -112,7 +114,7 @@ def assemble(opcode, operands) -> []:
             for s in par.segments:
                 code.append(s)
             par.clear()
-        case "set":
+        case "seti":
             code.append(0x00)
             code.append(0x2B)
             par = DWORD(operands[0])
@@ -329,6 +331,7 @@ def assemble(opcode, operands) -> []:
         case _:
             print(f"Unknown Opcode: {opcode}")
 
+    
     return code
 
 
@@ -352,7 +355,6 @@ def tokenize(progtext):
                 print("Error @{i}: Label already defined")
                 exit()
             labels[label[:-1]] = addr + 8
-            print(f"Label {label[:-1]} @ {hex(addr + 8)}")
         else:
             # regaular case
             code += assemble(opcode, operands)
@@ -371,7 +373,6 @@ def genHeader():
     ep = labels["start"]
 
     if ep:
-        print("WE FOUND START")
         par = DWORD(ep)
         for s in par.segments:
             header.append(s)

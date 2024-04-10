@@ -4,4 +4,4 @@ pushi 15
 divi
 ret
 start:
-call div
+call &div

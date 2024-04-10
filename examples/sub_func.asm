@@ -4,4 +4,4 @@ pushi 6
 subi
 ret
 start:
-call sub
+call &sub

@@ -4,4 +4,4 @@ pushi 3
 muli
 ret
 start:
-call mul
+call &mul

@@ -13,7 +13,7 @@ class DWORD:
         self.segments.append(int(num) & 0x000000FF)
         self.segments.append((int(num) & 0x0000FF00) >> 8)
         self.segments.append((int(num) & 0x00FF0000) >> 16)
-        # VARIABLE: 1 
+        # VARIABLE: 1
         # ADDRESS: 2
         # CONSTANT: 0
         if flag == 1:
@@ -53,11 +53,9 @@ def encode_value(operand) -> DWORD:
             idx = variables.__len__()
             variables[var] = idx
             res.set(idx, 1)
-            print("var: {}", idx)
     elif operand.startswith("&"):
         loc = operand.removeprefix("&")
         if loc in labels.keys():
-            print("FOUND LABEL: {}", loc)
             lab = labels[loc]
             res.set(lab, 2)
         elif loc in variables.keys():
@@ -66,7 +64,6 @@ def encode_value(operand) -> DWORD:
     else:
         res.set(operand, 0)
 
-    # print("{}", res)
     return res
 
 
@@ -418,7 +415,6 @@ def genHeader():
             header.append(s)
         par.clear()
 
-    print(header)
     return header
 
 

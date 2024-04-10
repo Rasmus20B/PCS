@@ -5,18 +5,30 @@ import struct
 
 
 class DWORD:
-    def __init__(self, num):
+
+    def __init__(self):
+        return
+
+    def set(self, num, flag: int):
         self.segments.append(int(num) & 0x000000FF)
         self.segments.append((int(num) & 0x0000FF00) >> 8)
         self.segments.append((int(num) & 0x00FF0000) >> 16)
-        self.segments.append((int(num) & 0xFF000000) >> 24)
+        # VARIABLE: 1 
+        # ADDRESS: 2
+        # CONSTANT: 0
+        if flag == 1:
+            self.segments.append((1))
+        elif flag == 2:
+            self.segments.append((2))
+        else:
+            self.segments.append((0))
 
     def __str__(self):
         i = 0
         i += (self.segments[0] & 0x000000FF)
         i += (self.segments[1] << 8) & 0x0000FF00
         i += (self.segments[2] << 16) & 0x00FF0000
-        i += (self.segments[3] << 24) & 0xFF000000
+        i += (self.segments[3] << 16) & 0xFF000000
         return str(i)
 
     def clear(self):
@@ -27,6 +39,35 @@ class DWORD:
 labels = {}
 
 variables = {}
+var_count = 0
+
+
+def encode_value(operand) -> DWORD:
+    res = DWORD()
+    if operand.startswith("$"):
+        var = operand.removeprefix("$")
+        if var in variables.keys():
+            idx = variables[var]
+            res.set(idx, 1)
+        else:
+            idx = variables.__len__()
+            variables[var] = idx
+            res.set(idx, 1)
+            print("var: {}", idx)
+    elif operand.startswith("&"):
+        loc = operand.removeprefix("&")
+        if loc in labels.keys():
+            print("FOUND LABEL: {}", loc)
+            lab = labels[loc]
+            res.set(lab, 2)
+        elif loc in variables.keys():
+            idx = variables[loc]
+            res.set(idx, 2)
+    else:
+        res.set(operand, 0)
+
+    # print("{}", res)
+    return res
 
 
 def assemble(opcode, operands) -> []:
@@ -44,32 +85,28 @@ def assemble(opcode, operands) -> []:
         case "call":
             code.append(0x00)
             code.append(0x0B)
-            a = labels[operands[0]]
-            par = DWORD(a)
+            par = encode_value(operands[0])
             for s in par.segments:
                 code.append(s)
             par.clear()
         case "jmp":
             code.append(0x00)
             code.append(0x0C)
-            a = labels[operands[0]]
-            par = DWORD(a)
+            par = encode_value(operands[0])
             for s in par.segments:
                 code.append(s)
             par.clear()
         case "jmpeq":
             code.append(0x00)
             code.append(0x0D)
-            a = labels[operands[0]]
-            par = DWORD(a)
+            par = encode_value(operands[0])
             for s in par.segments:
                 code.append(s)
             par.clear()
         case "jmpneq":
             code.append(0x00)
             code.append(0x0E)
-            a = labels[operands[0]]
-            par = DWORD(a)
+            par = encode_value(operands[0])
             for s in par.segments:
                 code.append(s)
             par.clear()
@@ -103,21 +140,21 @@ def assemble(opcode, operands) -> []:
         case "wait":
             code.append(0x00)
             code.append(0x17)
-            par = DWORD(operands[0])
+            par = encode_value(operands[0])
             for s in par.segments:
                 code.append(s)
             par.clear()
         case "pushi":
             code.append(0x00)
             code.append(0x2A)
-            par = DWORD(operands[0])
+            par = encode_value(operands[0])
             for s in par.segments:
                 code.append(s)
             par.clear()
         case "seti":
             code.append(0x00)
             code.append(0x2B)
-            par = DWORD(operands[0])
+            par = encode_value(operands[0])
             for s in par.segments:
                 code.append(s)
             par.clear()
@@ -127,6 +164,9 @@ def assemble(opcode, operands) -> []:
             par = struct.pack('<f', float(operands[0]))
             for s in par:
                 code.append(s)
+        case "pop":
+            code.append(0x00)
+            code.append(0x2E)
         case "addi":
             code.append(0x00)
             code.append(0x32)
@@ -155,30 +195,30 @@ def assemble(opcode, operands) -> []:
         case "movePos":
             code.append(0x01)
             code.append(0x90)
-            par = DWORD(operands[0])
+            par = encode_value(operands[0])
             for s in par.segments:
                 code.append(s)
             par.clear()
-            par = DWORD(operands[1])
+            par = encode_value(operands[1])
             for s in par.segments:
                 code.append(s)
             par.clear()
         case "movePosTime":
             code.append(0x01)
             code.append(0x91)
-            par = DWORD(operands[0])
+            par = encode_value(operands[0])
             for s in par.segments:
                 code.append(s)
             par.clear()
-            par = DWORD(operands[1])
+            par = encode_value(operands[1])
             for s in par.segments:
                 code.append(s)
             par.clear()
-            par = DWORD(operands[2])
+            par = encode_value(operands[2])
             for s in par.segments:
                 code.append(s)
             par.clear()
-            par = DWORD(operands[3])
+            par = encode_value(operands[3])
             for s in par.segments:
                 code.append(s)
             par.clear()
@@ -186,28 +226,27 @@ def assemble(opcode, operands) -> []:
         case "enmCreate":
             code.append(0x01)
             code.append(0x2C)
-            a = labels[operands[0]]
-            par = DWORD(a)
+            par = encode_value(operands[0])
             for s in par.segments:
                 code.append(s)
             par.clear()
-            par = DWORD(operands[1])
+            par = encode_value(operands[1])
             for s in par.segments:
                 code.append(s)
             par.clear()
-            par = DWORD(operands[2])
+            par = encode_value(operands[2])
             for s in par.segments:
                 code.append(s)
             par.clear()
-            par = DWORD(operands[3])
+            par = encode_value(operands[3])
             for s in par.segments:
                 code.append(s)
             par.clear()
-            par = DWORD(operands[4])
+            par = encode_value(operands[4])
             for s in par.segments:
                 code.append(s)
             par.clear()
-            par = DWORD(operands[5])
+            par = encode_value(operands[5])
             for s in par.segments:
                 code.append(s)
             par.clear()
@@ -226,14 +265,14 @@ def assemble(opcode, operands) -> []:
         case "etNew":
             code.append(0x02)
             code.append(0x58)
-            par = DWORD(operands[0])
+            par = encode_value(operands[0])
             for s in par.segments:
                 code.append(s)
             par.clear()
         case "etOn":
             code.append(0x02)
             code.append(0x59)
-            par = DWORD(operands[0])
+            par = encode_value(operands[0])
             for s in par.segments:
                 code.append(s)
             par.clear()
@@ -270,56 +309,56 @@ def assemble(opcode, operands) -> []:
         case "etAngle":
             code.append(0x02)
             code.append(0x5C)
-            par = DWORD(operands[0])
+            par = encode_value(operands[0])
             for s in par.segments:
                 code.append(s)
             par.clear()
-            par = DWORD(operands[1])
+            par = encode_value(operands[1])
             for s in par.segments:
                 code.append(s)
             par.clear()
-            par = DWORD(operands[2])
+            par = encode_value(operands[2])
             for s in par.segments:
                 code.append(s)
             par.clear()
         case "etSpeed":
             code.append(0x02)
             code.append(0x5D)
-            par = DWORD(operands[0])
+            par = encode_value(operands[0])
             for s in par.segments:
                 code.append(s)
             par.clear()
-            par = DWORD(operands[1])
+            par = encode_value(operands[1])
             for s in par.segments:
                 code.append(s)
             par.clear()
-            par = DWORD(operands[2])
+            par = encode_value(operands[2])
             for s in par.segments:
                 code.append(s)
             par.clear()
         case "etCount":
             code.append(0x02)
             code.append(0x5E)
-            par = DWORD(operands[0])
+            par = encode_value(operands[0])
             for s in par.segments:
                 code.append(s)
             par.clear()
-            par = DWORD(operands[1])
+            par = encode_value(operands[1])
             for s in par.segments:
                 code.append(s)
             par.clear()
-            par = DWORD(operands[2])
+            par = encode_value(operands[2])
             for s in par.segments:
                 code.append(s)
             par.clear()
         case "etAim":
             code.append(0x02)
             code.append(0x5F)
-            par = DWORD(operands[0])
+            par = encode_value(operands[0])
             for s in par.segments:
                 code.append(s)
             par.clear()
-            par = DWORD(operands[1])
+            par = encode_value(operands[1])
             for s in par.segments:
                 code.append(s)
             par.clear()
@@ -373,7 +412,8 @@ def genHeader():
     ep = labels["start"]
 
     if ep:
-        par = DWORD(ep)
+        par = DWORD()
+        par.set(ep, 2)
         for s in par.segments:
             header.append(s)
         par.clear()

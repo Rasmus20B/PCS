@@ -70,9 +70,6 @@ def encode_value(operand) -> DWORD:
         if loc in labels.keys():
             lab = labels[loc]
             res.set(lab, 2)
-        elif loc in variables.keys():
-            idx = variables[loc]
-            res.set(idx, 2)
     elif operand.startswith("#"):
         res.set(operand.removeprefix("#"), 0)
 
@@ -122,20 +119,18 @@ def assemble(opcode, operands) -> []:
         case "callasync":
             code.append(0x00)
             code.append(0x0F)
-            a = labels[operands[0]]
-            par = DWORD(a)
+            par = encode_value(operands[0])
             for s in par.segments:
                 code.append(s)
             par.clear()
         case "callasyncid":
             code.append(0x00)
             code.append(0x10)
-            a = labels[operands[0]]
-            par = DWORD(a)
+            par = encode_value(operands[0])
             for s in par.segments:
                 code.append(s)
             par.clear()
-            par = DWORD(operands[1])
+            par = encode_value(operands[1])
             for s in par.segments:
                 code.append(s)
             par.clear()
@@ -397,11 +392,11 @@ def tokenize(progtext):
             if len(operands) > 0:
                 print("Warning @{i}: operands to line starting with label will\
                       be ignored")
-            label = opcode
+            label = opcode.removesuffix(":")
             if label in labels:
                 print("Error @{i}: Label already defined")
                 exit()
-            labels[label[:-1]] = addr + 8
+            labels[label] = addr + 8
         else:
             # regaular case
             code += assemble(opcode, operands)
@@ -413,7 +408,9 @@ def tokenize(progtext):
 def genHeader():
     header = [0x7f, 0x44, 0x4d, 0x4c]
     ep = labels["start"]
-    print("labels: {}", labels)
+    print("labels: ", labels)
+
+    print(hex(ep))
     if ep:
         par = DWORD()
         par.set(ep, 2)
@@ -431,6 +428,7 @@ def translate(progtext) -> []:
     code = []
     code = tokenize(progtext)
     dml = genHeader() + code
+    print(f"LENGTH: {len(dml)}")
     return dml
 
 

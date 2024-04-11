@@ -1,11 +1,22 @@
 shoot1:
 etNew #0
 etCount #0 #1 #3
-etAim #0 #1
+etAim #0 #2
 etAngle #0 #15 #20
 etSpeed #0 #3 #3
 etOn #0
-jmpeq &shoot1
+pushi #0
+pushi #15
+pushi #12
+pushi #9
+pushi #6
+pushi #3
+loop1:
+seti $r1
+etCount #0 $r1 $r1
+etOn #0
+wait #500
+jmpneq &loop1
 ret
 shoot2:
 etNew #1
@@ -37,12 +48,11 @@ seti $r2
 ret
 start:
 movePos #100 #100
-movePosTime #20 #0 #400 #400 
+movePosTime #2000 #0 #400 #400 
 call &shoot2
-wait #200
-movePosTime #20 #0 #600 #100
-enmCreate &start #0 #0 #0 #0 #0
-call &shoot2
-wait #200
-movePosTime #20 #0 #100 #100
-call &shoot2
+wait #100
+movePosTime #2000 #0 #600 #100
+callasync &shoot1
+wait #100
+movePosTime #2000 #0 #100 #100
+wait #2000

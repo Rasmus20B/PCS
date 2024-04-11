@@ -20,8 +20,7 @@ def main():
     tokens = scanner.scan(content)
 
     for t in tokens:
-      print(t.valType)
-
+        print(t.valType)
 
     print("PARSING===================")
     parse = parser.parser(tokens)

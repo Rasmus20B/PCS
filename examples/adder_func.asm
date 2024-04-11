@@ -1,11 +1,11 @@
 add:
-pushi 4
+pushi #4
 print
-pushi 5
+pushi #5
 print
 addi
-seti $tmp
-pushi $tmp
+seti $r1
+pushi $r1
 ret
 start:
 call &add

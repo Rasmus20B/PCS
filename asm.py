@@ -38,20 +38,32 @@ class DWORD:
 
 labels = {}
 
-variables = {}
-var_count = 0
+regs = {
+    "r1": 0,
+    "r2": 1,
+    "r3": 2,
+    "r4": 3,
+    "r5": 4,
+    "r6": 5,
+    "r7": 6,
+    "r8": 7,
+    "r9": 8,
+    "r10": 9,
+    "r11": 10,
+    "r12": 11,
+    "r13": 12,
+    "r14": 13,
+    "r15": 14,
+    "r16": 15
+}
 
 
 def encode_value(operand) -> DWORD:
     res = DWORD()
     if operand.startswith("$"):
-        var = operand.removeprefix("$")
-        if var in variables.keys():
-            idx = variables[var]
-            res.set(idx, 1)
-        else:
-            idx = variables.__len__()
-            variables[var] = idx
+        reg = operand.removeprefix("$")
+        if reg in regs:
+            idx = regs[reg]
             res.set(idx, 1)
     elif operand.startswith("&"):
         loc = operand.removeprefix("&")
@@ -61,8 +73,8 @@ def encode_value(operand) -> DWORD:
         elif loc in variables.keys():
             idx = variables[loc]
             res.set(idx, 2)
-    else:
-        res.set(operand, 0)
+    elif operand.startswith("#"):
+        res.set(operand.removeprefix("#"), 0)
 
     return res
 
@@ -367,7 +379,6 @@ def assemble(opcode, operands) -> []:
         case _:
             print(f"Unknown Opcode: {opcode}")
 
-    
     return code
 
 
@@ -400,21 +411,19 @@ def tokenize(progtext):
 
 
 def genHeader():
-    header = []
-    header.append(0x7f)
-    header.append(0x44)
-    header.append(0x4d)
-    header.append(0x4c)
-
+    header = [0x7f, 0x44, 0x4d, 0x4c]
     ep = labels["start"]
-
+    print("labels: {}", labels)
     if ep:
         par = DWORD()
         par.set(ep, 2)
         for s in par.segments:
             header.append(s)
         par.clear()
+    else:
+        print("COULDN'T FIND START")
 
+    print(header)
     return header
 
 

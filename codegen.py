@@ -35,9 +35,9 @@ class codegen():
         if type(e) is pr.Binary:
             match e.operand:
                 case sc.TokenType.FUNC_CALL:
-                    self.buffer += f"call {e.child1}\n"
+                    self.buffer += f"call &{e.child1}\n"
                 case sc.TokenType.EQ:
-                    self.buffer += "set 1\n"
+                    self.buffer += "seti $1\n"
                 case sc.TokenType.ADD:
                     self.buffer += "addi\n"
                 case sc.TokenType.MUL:
@@ -67,5 +67,4 @@ class codegen():
                         else:
                             self.buffer += f"{ci.val}:\n"
                             self.emit_compound(ci.child)
-        self.buffer += "ret\n"
         print(self.buffer)

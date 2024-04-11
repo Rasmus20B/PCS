@@ -7,5 +7,5 @@ int add() {
 }
 
 int start() {
-  add(1, 2);
+  add();
 }

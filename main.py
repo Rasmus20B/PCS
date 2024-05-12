@@ -33,7 +33,7 @@ def main():
 
     output = asm.gen_bytecode(assembly.buffer)
 
-    print(output)
+    # print(output)
 
     if args.output:
         with open(args.output, "wb") as f:

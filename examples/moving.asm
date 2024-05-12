@@ -48,11 +48,13 @@ seti $r2
 ret
 start:
 movePos #100 #100
+callasync &shoot2
 movePosTime #2000 #0 #400 #400 
-call &shoot2
-wait #100
-movePosTime #2000 #0 #600 #100
+wait #500
+enmCreate &start #0 #0 #0 #0 #0
 callasync &shoot1
-wait #100
-movePosTime #2000 #0 #100 #100
+movePosTime #2000 #0 #600 #100
+wait #500
+callasync &shoot2
+movePosTime #2000 #0 #0 #0
 wait #2000

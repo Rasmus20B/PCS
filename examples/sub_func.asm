@@ -1,6 +1,6 @@
 sub:
-pushi 5
-pushi 6
+pushi #5
+pushi #6
 subi
 ret
 start:

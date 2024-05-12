@@ -371,6 +371,15 @@ def assemble(opcode, operands) -> []:
             code.append(0x03)
             code.append(0xE7)
 
+        case "printr":
+            code.append(0x03)
+            code.append(0xE8)
+            par = encode_value(operands[0])
+            for s in par.segments:
+                code.append(s)
+            par.clear()
+
+
         case _:
             print(f"Unknown Opcode: {opcode}")
 
@@ -408,9 +417,9 @@ def tokenize(progtext):
 def genHeader():
     header = [0x7f, 0x44, 0x4d, 0x4c]
     ep = labels["start"]
-    print("labels: ", labels)
+    # print("labels: ", labels)
 
-    print(hex(ep))
+    # print(hex(ep))
     if ep:
         par = DWORD()
         par.set(ep, 2)
@@ -420,7 +429,7 @@ def genHeader():
     else:
         print("COULDN'T FIND START")
 
-    print(header)
+    # print(header)
     return header
 
 
@@ -428,7 +437,6 @@ def translate(progtext) -> []:
     code = []
     code = tokenize(progtext)
     dml = genHeader() + code
-    print(f"LENGTH: {len(dml)}")
     return dml
 
 
@@ -445,6 +453,7 @@ def main():
     with open(args.inputFile, "r") as f:
         content = f.read()
 
+    content.strip()
     out = translate(content)
     if args.output:
         with open(args.output, "wb") as f:

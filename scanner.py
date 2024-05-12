@@ -1,5 +1,4 @@
 from enum import Enum
-
 from attrs import define, field
 
 
@@ -135,7 +134,7 @@ def scan(prog: progText):
                                 t = Token(valType=TokenType.INT_LIT, val=cur)
                                 tokens.append(t)
                                 prog.index -= 1
-                        break
+                            break
                 elif (prog.curTok().isalpha()):
                     while (prog.curTok().isalnum()):
                         cur += prog.curTok()

@@ -145,7 +145,17 @@ class parser():
         if t.valType not in {sc.TokenType.CLOSE_PAREN,
                              sc.TokenType.COMMA}:
             ptype = t.valType
-            return Unary(self.parse_f_args(), ptype, sc.TokenType.IDENT, t.val)
+            print(f"found arg {self.tokens[self.idx].val} \
+                    with type: {t.valType}")
+            if self.tokens[self.idx + 1].valType not in {
+                    sc.TokenType.CLOSE_PAREN,
+                    sc.TokenType.COMMA}:
+                return Binary(ptype, t.val,
+                              self.parse_expr(),
+                              self.parse_f_args())
+            else:
+                return Binary(ptype, t.val,
+                              None, self.parse_f_args())
         else:
             self.idx += 1
             return
@@ -265,12 +275,19 @@ class parser():
         return cs
 
     def parse_func_decl(self, ident: str, ftype: str):
+        f = fn.function(0, 0, [], [])
         while self.tokens[self.idx].valType != sc.TokenType.CLOSE_PAREN:
+            match self.tokens[self.idx].valType:
+                case [sc.TokenType.INT, sc.TokenType.FLOAT]:
+                    f.argn += 1
+                    f.arg_types.append(self.tokens[self.idx].val)
+                    if self.tokens[self.idx+1].valType == sc.TokenType.IDENT:
+                        f.arg_names.append(self.tokens[self.idx+1].val)
             self.idx += 1
         self.idx += 1
 
         # add function symbol
-        self.functions[ident] = fn.function(ftype, 0, {})
+        self.functions[ident] = f
         match self.tokens[self.idx].valType:
             case sc.TokenType.OPEN_BRACK:
                 return Unary(self.parse_compound_statement(),

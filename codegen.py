@@ -13,14 +13,35 @@ class codegen():
     functions = {}
     variables = {}
     var_count = 0
+    stack = []
+
+    def emit_intrinsic_call(self, e, intrinsic, code):
+        print(f"found intrinsic: {code}")
+        print("intrin: ", intrinsic.argn)
+        for i in range(0, intrinsic.argn + 1):
+            print("removing line: ",
+                  self.buffer[self.buffer.rfind('\n')])
+            self.buffer = self.buffer[:self.buffer.rfind('\n')]
+        self.buffer += f"\n{code}"
+        args = e.child2
+        while args:
+            self.buffer += f" #{args.val}"
+            args = args.child2
+        self.buffer += "\n"
+        pass
+
+    def emit_function_call(self, e: pr.Binary):
+        if type(e) is pr.Binary:
+            self.buffer += f"call &{e.val}\n"
 
     def emit_unary_expr(self, e):
         if type(e) is pr.Unary and e.child is not None:
             if type(e.child) is pr.Unary:
                 self.emit_unary_expr(e.child)
-            if type(e.child) is pr.Binary:
+            elif type(e.child) is pr.Binary:
                 self.emit_binary_expr(e.child)
 
+        print("here as well")
         match e.ttype:
             case sc.TokenType.RETURN:
                 self.buffer += "ret\n"
@@ -29,23 +50,36 @@ class codegen():
         if type(e) is pr.Binary and e.child2 is not None:
             self.emit_binary_expr(e.child2)
 
-        if type(e) is pr.Binary and e.child1 is not None:
+        elif type(e) is pr.Binary and e.child1 is not None:
             self.emit_binary_expr(e.child1)
 
         if type(e) is pr.Binary:
             match e.operand:
                 case sc.TokenType.FUNC_CALL:
-                    self.buffer += f"call &{e.child1}\n"
+                    intrinsic = ins.intrins.get(e.val)
+                    if intrinsic is not None:
+                        self.emit_intrinsic_call(e, intrinsic, e.val)
+                    else:
+                        print("Found a function call")
+                        self.emit_function_call(e)
                 case sc.TokenType.EQ:
                     self.buffer += "seti $1\n"
                 case sc.TokenType.ADD:
+                    self.emit_binary_expr(e.child1)
                     self.buffer += "addi\n"
                 case sc.TokenType.MUL:
                     self.buffer += "muli\n"
                 case sc.TokenType.INT_LIT:
-                    self.buffer += f"pushi {e.val}\n"
+                    print(f"found arguments: {e.val}, {type(e)}")
+                    self.buffer += f"pushi #{e.val}\n"
+                    self.stack.append(e.val)
+                case sc.TokenType.IDENT:
+                    print(f"found args: {e.val}, {type(e)}")
+                    # self.buffer += f"pushi {e.val}\n"
+
         if type(e) is pr.Unary:
             self.emit_unary_expr(e)
+        print('here')
 
     def emit_compound(self, ch):
         for s in ch.children:
@@ -57,6 +91,7 @@ class codegen():
                 self.emit_binary_expr(s)
 
     def emit_program(self):
+        print("Code Emission==============")
         for ci in self.tree.ast.children:
             if type(ci) is pr.Unary:
                 match ci.ttype:

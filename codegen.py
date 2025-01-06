@@ -16,11 +16,7 @@ class codegen():
     stack = []
 
     def emit_intrinsic_call(self, e, intrinsic, code):
-        print(f"found intrinsic: {code}")
-        print("intrin: ", intrinsic.argn)
         for i in range(0, intrinsic.argn + 1):
-            print("removing line: ",
-                  self.buffer[self.buffer.rfind('\n')])
             self.buffer = self.buffer[:self.buffer.rfind('\n')]
         self.buffer += f"\n{code}"
         args = e.child2
@@ -41,7 +37,6 @@ class codegen():
             elif type(e.child) is pr.Binary:
                 self.emit_binary_expr(e.child)
 
-        print("here as well")
         match e.ttype:
             case sc.TokenType.RETURN:
                 self.buffer += "ret\n"

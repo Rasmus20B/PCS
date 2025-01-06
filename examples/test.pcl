@@ -1,5 +1,5 @@
 int add() {
-  return 4 + 2 + 5;
+  return 2 * (4 * 6);
 }
 
 int check(int i, int j) {
@@ -8,5 +8,4 @@ int check(int i, int j) {
 }
 
 int start() {
-  movePosTime(2000, 0, 200, 300);
 }
